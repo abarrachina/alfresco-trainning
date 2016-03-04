@@ -1,6 +1,6 @@
 <webscript>
     <shortname>Migrate User Webscript</shortname>
-    <description>Hands back a greeting</description>
+    <description>Migrate User</description>
     <url>/api/migrateuser?newuser={newuser}&amp;olduser={olduser}</url>
     <authentication>user</authentication>
     <format default="html"></format>
