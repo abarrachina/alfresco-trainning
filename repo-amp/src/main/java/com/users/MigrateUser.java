@@ -25,10 +25,9 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
- * A demonstration Java controller for the Hello World Web Script.
+ * Java Migrate User Web Script.
  *
- * @author martin.bergljung@alfresco.com
- * @since 2.1.0
+ * @author nazareth.jimenez@ixxus.com
  */
 public class MigrateUser extends DeclarativeWebScript {
     @Override
