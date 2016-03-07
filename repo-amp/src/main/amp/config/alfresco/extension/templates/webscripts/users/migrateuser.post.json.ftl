@@ -1,1 +1,1 @@
-{ "test": ${fromJava} }
+{ "code": ${code} }
