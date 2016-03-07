@@ -8,7 +8,7 @@
 			<property name="authorityService" ref="AuthorityService" />
 			<property name="siteService" ref="SiteService" />
 			<property name="nodeService" ref="NodeService" />
-			<property name="searchService" ref="searchService" />
-			<property name="policyBehaviourFilter" ref="PolicyBehaviourFilter" />			
+			<property name="searchService" ref="SearchService" />
+			<property name="policyBehaviourFilter" ref="policyBehaviourFilter" />			
 		</bean>
 </beans>

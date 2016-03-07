@@ -70,16 +70,16 @@ public class MigrateUser extends DeclarativeWebScript {
         this. siteService =  siteService;
     }
 
+    public void setPolicyBehaviourFilter(final BehaviourFilter policyBehaviourFilter) {
+        this.policyBehaviourFilter = policyBehaviourFilter;
+    }
+
     public void setNodeService(final NodeService  nodeService) {
         this. nodeService =  nodeService;
     }
 
     public void setSearchService(final SearchService  searchService) {
         this. searchService =  searchService;
-    }
-
-    public void setBehaviourFilter(final BehaviourFilter behaviourFilter) {
-        this.policyBehaviourFilter = behaviourFilter;
     }
 
     @Override
