@@ -5,5 +5,10 @@
 
 		<bean id="webscript.users.migrateuser.post" class="com.users.MigrateUser" parent="webscript">
 			<property name="personService" ref="PersonService" />
+			<property name="authorityService" ref="AuthorityService" />
+			<property name="siteService" ref="SiteService" />
+			<property name="nodeService" ref="NodeService" />
+			<property name="searchService" ref="searchService" />
+			<property name="behaviourFilter" ref="BehaviourFilter" />			
 		</bean>
 </beans>
