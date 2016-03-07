@@ -2,6 +2,5 @@
     <shortname>Migrate User Webscript</shortname>
     <description>Migrate User</description>
     <url>/api/migrateuser?newuser={newuser}&amp;olduser={olduser}</url>
-    <authentication>user</authentication>
-    <format default="html"></format>
+    <format default="json">extension</format>
 </webscript>
