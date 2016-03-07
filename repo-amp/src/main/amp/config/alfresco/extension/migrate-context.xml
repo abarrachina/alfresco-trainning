@@ -9,6 +9,6 @@
 			<property name="siteService" ref="SiteService" />
 			<property name="nodeService" ref="NodeService" />
 			<property name="searchService" ref="searchService" />
-			<property name="behaviourFilter" ref="BehaviourFilter" />			
+			<property name="policyBehaviourFilter" ref="PolicyBehaviourFilter" />			
 		</bean>
 </beans>
