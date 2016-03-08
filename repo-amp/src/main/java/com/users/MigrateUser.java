@@ -50,7 +50,6 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class MigrateUser extends DeclarativeWebScript {
 
     private static Log logger = LogFactory.getLog(MigrateUser.class);
-
     private PersonService personService;
     private AuthorityService authorityService;
     private SiteService siteService;
@@ -81,6 +80,7 @@ public class MigrateUser extends DeclarativeWebScript {
     public void setBehaviourFilter(final BehaviourFilter behaviourFilter) {
         this.behaviourFilter = behaviourFilter;
     }
+
 
     @Override
     protected Map<String, Object> executeImpl(final WebScriptRequest req, final Status status, final Cache cache) {

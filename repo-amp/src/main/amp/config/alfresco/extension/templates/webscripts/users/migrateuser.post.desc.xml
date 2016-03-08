@@ -1,8 +1,10 @@
 <webscript>
     <shortname>Migrate User Webscript</shortname>
     <description>Migrate User</description>
+
     <url>/api/migrateuser?newuser={newuser}&amp;olduser={olduser}&amp;sites={sites}&amp;groups={groups}&amp;content={content}&amp;comments={comments}&amp;userhome={userhome}&amp;datauser={datauser}&amp;likes={likes}&amp;favorites={favorites}&amp;workflows={workflows}</url>
     <authentication runas="admin">user</authentication>
   	<format default="json">extension</format>
   	<transaction>required</transaction>
+
 </webscript>
