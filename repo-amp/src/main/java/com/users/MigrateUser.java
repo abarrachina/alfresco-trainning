@@ -83,7 +83,7 @@ public class MigrateUser extends DeclarativeWebScript {
     }
 
     public void setBehaviourFilter(final BehaviourFilter behaviourFilter) {
-        this.behaviourFilter = behaviourFilter;
+        this.policyBehaviourFilter = behaviourFilter;
     }
 
 
