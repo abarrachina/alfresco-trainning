@@ -23,7 +23,7 @@
       <#assign el=args.htmlid?html>
       <div id="${el}-body" class="users">
       
-      	<form  id="${el}-options-form" action="${url.context}/service/components/console/migrate-user" method="post">
+      	<form  id="${el}-options-form" action="${url.service}" method="get">
          <!-- Search panel -->
          <div id="${el}-search" class="hidden">
             <div class="yui-g">
