@@ -55,7 +55,7 @@ public class MigrateUser extends DeclarativeWebScript {
     private SiteService siteService;
     private NodeService nodeService;
     private SearchService searchService;
-    private BehaviourFilter behaviourFilter;
+    private BehaviourFilter policyBehaviourFilter;
 
     public void setPersonService(final PersonService  personService) {
         this. personService =  personService;
@@ -67,6 +67,10 @@ public class MigrateUser extends DeclarativeWebScript {
 
     public void setSiteService(final SiteService  siteService) {
         this. siteService =  siteService;
+    }
+
+    public void setPolicyBehaviourFilter(final BehaviourFilter policyBehaviourFilter) {
+        this.policyBehaviourFilter = policyBehaviourFilter;
     }
 
     public void setNodeService(final NodeService  nodeService) {
@@ -98,9 +102,6 @@ public class MigrateUser extends DeclarativeWebScript {
         final String likes = req.getParameter("likes");
         final String favorites = req.getParameter("favorites");
         final String workflows = req.getParameter("workflows");
-
-        final NodeRef olduserRef;
-        final NodeRef newuserRef;
 
         if((newuser == null) || (olduser == null)){
             throw new WebScriptException("Missing mandatory params");
@@ -208,14 +209,14 @@ public class MigrateUser extends DeclarativeWebScript {
 
                 final NodeRef nodeRef = result.getNodeRef();
                 // Disable auditable aspect to allow change properties of cm:auditable aspect
-                behaviourFilter.disableBehaviour(nodeRef, ContentModel.ASPECT_AUDITABLE);
+                policyBehaviourFilter.disableBehaviour(nodeRef, ContentModel.ASPECT_AUDITABLE);
 
                 // Update properties of cm:auditable aspect
                 nodeService.setProperty(nodeRef, ContentModel.PROP_CREATOR, newuser);
                 nodeService.setProperty(nodeRef, ContentModel.PROP_MODIFIER, newuser);
 
                 // Enable auditable aspect
-                behaviourFilter.enableBehaviour(nodeRef, ContentModel.ASPECT_AUDITABLE);
+                policyBehaviourFilter.enableBehaviour(nodeRef, ContentModel.ASPECT_AUDITABLE);
 
             }
         }
