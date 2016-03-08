@@ -93,7 +93,7 @@
                 };
                 
                 olduser = fnGetter("-create-olduser");
-                newuser = fnGetter("-create-newuser");                
+                newuser = fnGetter("-create-newuser-input");                
                 sites = fnCheck("-items-sites");
                 groups = fnCheck("-items-groups");
                 content = fnCheck("-items-content");
@@ -225,9 +225,14 @@
                     this.widgets.addUserPanel.hide();
                     var fnSetter = function(id, val)
                     {
+                       Dom.get(parent.id + id).innerHTML = val ? $html(val) : "";
+                    };
+                    var fnSetterValue = function(id, val)
+                    {
                        Dom.get(parent.id + id).value = val ? $html(val) : "";
                     };
                     fnSetter("-create-newuser", args[1].userName);
+                    fnSetterValue("-create-newuser-input", args[1].userName);
                 
             }, this);
          },

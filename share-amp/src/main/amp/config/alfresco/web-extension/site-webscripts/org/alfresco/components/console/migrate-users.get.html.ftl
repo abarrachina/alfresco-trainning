@@ -1,12 +1,14 @@
 <@markup id="css" >
    <#-- CSS Dependencies -->
-   <@link href="${url.context}/res/components/console/migrateusers.css" group="console"/>   
+   <@link href="${url.context}/res/components/console/migrateusers.css" group="console"/>
+   <@link href="${url.context}/res/components/people-finder/people-finder.css" group="console"/>   
 </@>
 
 <@markup id="js" >
    <#-- JavaScript Dependencies -->
    <@script src="${url.context}/res/components/console/consoletool.js" group="console"/>
-   <@script src="${url.context}/res/components/console/migrate-users.js" group="console"/>   
+   <@script src="${url.context}/res/components/console/migrate-users.js" group="console"/>
+   <@script src="${url.context}/res/components/people-finder/people-finder.js" group="console"/> 
 </@>
 
 <@markup id="widgets">
@@ -14,10 +16,11 @@
 </@>
 
 <@markup id="html">
-   <@uniqueIdDiv>
+   <@uniqueIdDiv>   
       <!--[if IE]>
       <iframe id="yui-history-iframe" src="${url.context}/res/yui/history/assets/blank.html"></iframe> 
       <![endif]-->
+      <#include "../../include/alfresco-macros.lib.ftl" />
       <input id="yui-history-field" type="hidden" />
       
       <#assign el=args.htmlid?html>
@@ -46,11 +49,13 @@
          </div>
          
          <div id="${el}-view-main" class="">
-     		 <div class="field-row">
-                  <span class="crud-label">${msg("label.newuser")}:&nbsp;*</span>
-             </div>
+     		 
              <div class="field-row">
-                <input class="crud-input" id="${el}-create-newuser" type="text" maxlength="256" />
+             	<div class="crud-label">             
+               <button  id="${el}-create-newuser-button"><img src="/share/res/components/images/user-16.png" style="vertical-align: text-bottom" width="16">${msg("label.newuser")}</button> 
+               <span class="crud-input" id="${el}-create-newuser" ></span>
+               <input type="hidden" class="crud-input" id="${el}-create-newuser-input"/>
+               </div>
              </div>
          </div>
          
@@ -101,12 +106,25 @@
          	<label class="crud-label" for="${el}-items-workflows">${msg("label.items.workflows")}</label>
          </div>
          
+         
+         
+         
          <div>
                <div class="updateuser-save-button left">
                   <span class="yui-button yui-push-button" id="${el}-updateuser-save-button">
                      <span class="first-child"><button>${msg("button.save")}</button></span>
                   </span>
                </div>              
+            </div>
+            
+                        <!-- People Finder Dialog -->
+            <div id="${el}-peoplepicker" class="groups people-picker" style="visibility: hidden;">
+               <div class="hd"><span id="${el}-peoplepicker-title">${msg("panel.adduser.header")}</span></div>
+               <div class="bd">
+                  <div style="margin: auto 10px;">
+                     <div id="${el}-search-peoplefinder"></div>
+                  </div>
+               </div>
             </div>
          </form>
       </div>
