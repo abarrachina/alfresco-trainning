@@ -107,7 +107,6 @@
                 
             	 Alfresco.util.Ajax.request(
 	            {
-	            	//?newuser={newuser}&amp;olduser={olduser}&amp;sites={sites}&amp;groups={groups}&amp;content={content}&amp;comments={comments}&amp;userhome={userhome}&amp;datauser={datauser}&amp;likes={likes}&amp;favorites={favorites}&amp;workflows={workflows}
 	               url: Alfresco.constants.PROXY_URI + "api/migrateuser/?"+getValues ,
 	               method: Alfresco.util.Ajax.POST, 
 	               successCallback:
