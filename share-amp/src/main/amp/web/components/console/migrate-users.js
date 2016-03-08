@@ -85,17 +85,24 @@
                    return Dom.get(me.id + id).value;
                 };
                 
+                var fnCheck = function(id)
+                {
+                   if (Dom.get(me.id + id).checked)
+                	   return Dom.get(me.id + id).value;
+                   return 0;
+                };
+                
                 olduser = fnGetter("-create-olduser");
-                newuser = fnGetter("-create-newuser");                
-                sites = fnGetter("-items-sites");
-                groups = fnGetter("-items-groups");
-                content = fnGetter("-items-content");
-                comments = fnGetter("-items-comments");
-                userhome = fnGetter("-items-userhome");
-                datauser = fnGetter("-items-datauser");
-                likes = fnGetter("-items-likes");
-                favorites = fnGetter("-items-favorites");
-                workflows = fnGetter("-items-workflows");                
+                newuser = fnGetter("-create-newuser-input");                
+                sites = fnCheck("-items-sites");
+                groups = fnCheck("-items-groups");
+                content = fnCheck("-items-content");
+                comments = fnCheck("-items-comments");
+                userhome = fnCheck("-items-userhome");
+                datauser = fnCheck("-items-datauser");
+                likes = fnCheck("-items-likes");
+                favorites = fnCheck("-items-favorites");
+                workflows = fnCheck("-items-workflows");                
                 var getValues = "newuser="+encodeURIComponent(newuser)+"&olduser="+encodeURIComponent(olduser)+"&sites="+sites+"&groups="+groups+"&content="+content+"&userhome="+userhome+"&datauser="+datauser+"&likes="+likes+"&favorites="+favorites+"&workflows="+workflows; 
                 
             	 Alfresco.util.Ajax.request(
@@ -110,10 +117,14 @@
 	               },
 	               failureMessage: ""
 	            });
-            	 console.log("bbb");
             });
             
-//            // Form definition
+            parent.widgets.selectUserButton = Alfresco.util.createYUIButton(parent, "create-newuser-button", function(){
+            	
+            	 this.modules.searchPeopleFinder.clearResults();            	 
+                 this.widgets.addUserPanel.show();
+            });
+              // Form definition
 //            var form = new Alfresco.forms.Form(parent.id + "-options-form");
 //            form.setSubmitElements([parent.widgets.applyButton]);
 //            form.setSubmitAsJSON(true);
@@ -126,6 +137,104 @@
 //               }
 //            });
 //            form.init();
+            
+            // Load in the People Finder component from the server
+            Alfresco.util.Ajax.request(
+            {
+               url: Alfresco.constants.URL_SERVICECONTEXT + "components/people-finder/people-finder",
+               dataObj:
+               {
+                  htmlid: parent.id + "-search-peoplefinder"
+               },
+               successCallback:
+               {
+                  fn: this.onPeopleFinderLoaded,
+                  scope: parent
+               },
+               failureMessage: "Could not load People Finder component",
+               execScripts: true
+            });
+            
+            
+         },
+         
+         /**
+          * Called when the user has selected a person from the add user dialog.
+          *
+          * @method onPersonSelected
+          * @param e DomEvent
+          * @param args Event parameters (depends on event type)
+          */
+         onPersonSelected: function ConsoleGroups_SearchPanelHandler_onPersonSelected(e, args)
+         {
+            // This is a "global" event so we ensure the event is for the current panel by checking panel visibility.
+        	 console.log("Persona seleccionada");
+            if (this._visible)
+            {
+               var name = args[1].firstName + " " + args[1].lastName;
+               this.widgets.addUserPanel.hide();
+               this._addToGroup(
+                     args[1].userName,
+                     this._selectedParentGroupShortName,
+                     parent._msg("message.adduser-success", name),
+                     parent._msg("message.adduser-failure", name));
+            }
+         },
+         
+         /**
+          * Called when the user clicks the add user icon in the column browser header
+          *
+          * @method onAddUserClick
+          * @param columnInfo
+          */
+         onAddUserClick: function ConsoleGroups_SearchPanelHandler_onAddUserClick(columnInfo)
+         {
+            this._selectedParentGroupShortName = columnInfo.parent.shortName;
+            this.modules.searchPeopleFinder.clearResults();
+            this.widgets.addUserPanel.show();
+         },
+         
+         /**
+          * Called when the people finder template has been loaded.
+          * Creates a dialog and inserts the people finder for choosing users to add.
+          *
+          * @method onPeopleFinderLoaded
+          * @param response The server response
+          */
+         onPeopleFinderLoaded: function ConsoleGroups_SearchPanelHandler_onPeopleFinderLoaded(response)
+         {
+        	 
+            // Inject the component from the XHR request into it's placeholder DIV element
+            var finderDiv = Dom.get(parent.id + "-search-peoplefinder");
+            finderDiv.innerHTML = response.serverResponse.responseText;
+            // Create the Add User dialog
+            this.widgets.addUserPanel = Alfresco.util.createYUIPanel(parent.id + "-peoplepicker");
+            // Find the People Finder by container ID
+            this.modules.searchPeopleFinder = Alfresco.util.ComponentManager.get(parent.id + "-search-peoplefinder");
+
+            // Set the correct options for our use
+            this.modules.searchPeopleFinder.setOptions(
+            {
+               singleSelectMode: true
+            });
+            
+            // Make sure we listen for events when the user selects a person
+            YAHOO.Bubbling.on("personSelected", function(e,args){            	
+                    
+                    console.log(args[1].userName);
+                    this.widgets.addUserPanel.hide();
+                    var fnSetter = function(id, val)
+                    {
+                       Dom.get(parent.id + id).innerHTML = val ? $html(val) : "";
+                    };
+                    var fnSetterValue = function(id, val)
+                    {
+                       Dom.get(parent.id + id).value = val ? $html(val) : "";
+                    };
+                    fnSetter("-create-newuser", args[1].userName);
+                    fnSetterValue("-create-newuser-input", args[1].userName);
+                
+            }, this);
          },
          
          /**
