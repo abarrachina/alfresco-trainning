@@ -24,6 +24,7 @@ import java.util.Set;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authority.UnknownAuthorityException;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -82,7 +83,7 @@ public class MigrateUser extends DeclarativeWebScript {
     }
 
     public void setBehaviourFilter(final BehaviourFilter behaviourFilter) {
-        this.behaviourFilter = behaviourFilter;
+        this.policyBehaviourFilter = behaviourFilter;
     }
 
 
@@ -98,7 +99,6 @@ public class MigrateUser extends DeclarativeWebScript {
         final String content = req.getParameter("content");
         final String comments = req.getParameter("comments");
         final String userhome = req.getParameter("userhome");
-        final String datauser = req.getParameter("datauser");
         final String likes = req.getParameter("likes");
         final String favorites = req.getParameter("favorites");
         final String workflows = req.getParameter("workflows");
@@ -108,15 +108,21 @@ public class MigrateUser extends DeclarativeWebScript {
         }
 
         if (personService.personExists(newuser)) {
-            if (sites.equalsIgnoreCase("true")){
+            if ((sites != null) && (sites.equalsIgnoreCase("true"))){
                 migrateSites(olduser, newuser);
             }
-            if (groups.equalsIgnoreCase("true")){
+            if ((groups != null) && (groups.equalsIgnoreCase("true"))){
                 migrateGroups(olduser, newuser);
             }
-            if (content.equalsIgnoreCase("true")){
+            if ((content != null) && (content.equalsIgnoreCase("true"))){
                 migrateContent(olduser, newuser);
                 migrateFolder(olduser, newuser);
+            }
+            if ((comments != null) && (comments.equalsIgnoreCase("true"))){
+                migrateComments(olduser, newuser);
+            }
+            if ((userhome != null) && (userhome.equalsIgnoreCase("true"))){
+                migrateUserHome(olduser, newuser);
             }
         }
 
@@ -191,6 +197,47 @@ public class MigrateUser extends DeclarativeWebScript {
         strQuery += " AND ";
         strQuery += "@cm\\:creator:\"" + olduser + "\"";
         changeCreator(strQuery, newuser);
+
+    }
+
+    /***
+     * Migrate comments from olduser to newuser
+     *
+     * @param olduser
+     * @param newuser
+     */
+    private void migrateComments (final String olduser, final String newuser){
+        String strQuery="TYPE:\"fm\\:post\"";
+        strQuery += " AND ";
+        strQuery += "@cm\\:creator:\"" + olduser + "\"";
+        changeCreator(strQuery, newuser);
+    }
+
+    /***
+     * Migrate user home from olduser to newuser
+     *
+     * @param olduser
+     * @param newuser
+     */
+    private void migrateUserHome (final String olduser, final String newuser){
+        final NodeRef oldUserNodeRef = personService.getPerson(olduser);
+        final NodeRef newUserNodeRef = personService.getPerson(newuser);
+        final NodeRef homespaceOldUserNodeRef = (NodeRef) nodeService.getProperty(oldUserNodeRef, ContentModel.PROP_HOMEFOLDER);
+        final NodeRef homespaceNewUserNodeRef = (NodeRef) nodeService.getProperty(newUserNodeRef, ContentModel.PROP_HOMEFOLDER);
+        final List<ChildAssociationRef> childs = nodeService.getChildAssocs(homespaceOldUserNodeRef);
+        for (final ChildAssociationRef child:childs){
+            final NodeRef node = child.getChildRef();
+            final NodeRef newnode = nodeService.moveNode(node, homespaceNewUserNodeRef, ContentModel.ASSOC_CONTAINS, ContentModel.ASSOC_CHILDREN).getChildRef();
+
+            policyBehaviourFilter.disableBehaviour(newnode, ContentModel.ASPECT_AUDITABLE);
+
+            // Update properties of cm:auditable aspect
+            nodeService.setProperty(newnode, ContentModel.PROP_CREATOR, newuser);
+            nodeService.setProperty(newnode, ContentModel.PROP_MODIFIER, newuser);
+
+            // Enable auditable aspect
+            policyBehaviourFilter.enableBehaviour(newnode, ContentModel.ASPECT_AUDITABLE);
+        }
 
     }
 
