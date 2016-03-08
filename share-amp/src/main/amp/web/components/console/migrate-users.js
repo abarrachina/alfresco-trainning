@@ -77,11 +77,31 @@
          {
             // Buttons
             parent.widgets.applyButton = Alfresco.util.createYUIButton(parent, "updateuser-save-button", function(){
-            	console.log(Alfresco.constants.PROXY_URI);
+            	
+            	var olduser, newuser, me, sites, groups, content, comments, userhome, datauser, likes, favorites, workflows;
+            	me = this;
+            	var fnGetter = function(id)
+                {
+                   return Dom.get(me.id + id).value;
+                };
+                
+                olduser = fnGetter("-create-olduser");
+                newuser = fnGetter("-create-newuser");                
+                sites = fnGetter("-items-sites");
+                groups = fnGetter("-items-groups");
+                content = fnGetter("-items-content");
+                comments = fnGetter("-items-comments");
+                userhome = fnGetter("-items-userhome");
+                datauser = fnGetter("-items-datauser");
+                likes = fnGetter("-items-likes");
+                favorites = fnGetter("-items-favorites");
+                workflows = fnGetter("-items-workflows");                
+                var getValues = "newuser="+encodeURIComponent(newuser)+"&olduser="+encodeURIComponent(olduser)+"&sites="+sites+"&groups="+groups+"&content="+content+"&userhome="+userhome+"&datauser="+datauser+"&likes="+likes+"&favorites="+favorites+"&workflows="+workflows; 
+                
             	 Alfresco.util.Ajax.request(
 	            {
 	            	//?newuser={newuser}&amp;olduser={olduser}&amp;sites={sites}&amp;groups={groups}&amp;content={content}&amp;comments={comments}&amp;userhome={userhome}&amp;datauser={datauser}&amp;likes={likes}&amp;favorites={favorites}&amp;workflows={workflows}
-	               url: Alfresco.constants.PROXY_URI + "api/migrateuser/?newuser=test1&olduser=test2&sites=1&groups=1&content=1&comments=1&userhome=1&datauser=1&likes=1&favorites=1&workflows=1" ,
+	               url: Alfresco.constants.PROXY_URI + "api/migrateuser/?"+getValues ,
 	               method: Alfresco.util.Ajax.POST, 
 	               successCallback:
 	               {
