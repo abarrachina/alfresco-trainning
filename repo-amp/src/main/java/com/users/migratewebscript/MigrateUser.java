@@ -89,6 +89,12 @@ public class MigrateUser extends DeclarativeWebScript {
             if ((userhome != null) && (userhome.equalsIgnoreCase("true"))){
                 migrateServiceImpl.migrateUserHome(olduser, newuser);
             }
+            if ((likes != null) && (likes.equalsIgnoreCase("true"))){
+                migrateServiceImpl.migrateLikes(olduser, newuser);
+            }
+            if ((favorites != null) && (favorites.equalsIgnoreCase("true"))){
+                migrateServiceImpl.migratePreferences(olduser, newuser);
+            }
         }
 
         return model;

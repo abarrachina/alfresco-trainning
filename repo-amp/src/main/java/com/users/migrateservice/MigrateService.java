@@ -54,4 +54,20 @@ public interface MigrateService{
      * @param newuser
      */
     public void migrateUserHome (final String olduser, final String newuser);
+
+    /***
+     * Migrate preferences from olduser to newuser
+     *
+     * @param olduser
+     * @param newuser
+     */
+    public void migratePreferences (final String olduser, final String newuser);
+
+    /***
+     * Migrate likes from olduser to newuser
+     *
+     * @param olduser
+     * @param newuser
+     */
+    public void migrateLikes (final String olduser, final String newuser);
 }

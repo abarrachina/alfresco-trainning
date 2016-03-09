@@ -1,6 +1,8 @@
 package com.users.migrateservice;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -8,6 +10,7 @@ import javax.inject.Inject;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authority.UnknownAuthorityException;
+import org.alfresco.service.cmr.preference.PreferenceService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -45,6 +48,9 @@ public class MigrateServiceImpl implements MigrateService{
 
     @Inject
     private BehaviourFilter policyBehaviourFilter;
+
+    @Inject
+    private PreferenceService preferenceService;
 
     @Override
     public void migrateSites(final String olduser, final String newuser) {
@@ -125,6 +131,21 @@ public class MigrateServiceImpl implements MigrateService{
             }
         }
 
+    }
+
+    @Override
+    public void migratePreferences (final String olduser, final String newuser){
+        final Map<String, Serializable> preferences = preferenceService.getPreferences(olduser);
+        preferenceService.setPreferences(newuser, preferences);
+        preferenceService.clearPreferences(olduser);
+    }
+
+    @Override
+    public void migrateLikes (final String olduser, final String newuser){
+        String strQuery="TYPE:\"cm\\:rating\"";
+        strQuery += " AND ";
+        strQuery += "@cm\\:creator:\"" + olduser + "\"";
+        changeCreator(strQuery, newuser);
     }
 
     /***
