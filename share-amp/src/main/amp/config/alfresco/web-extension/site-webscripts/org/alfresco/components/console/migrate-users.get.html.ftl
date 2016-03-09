@@ -26,7 +26,7 @@
       <#assign el=args.htmlid?html>
       <div id="${el}-body" class="users">
       
-      	<form  id="${el}-options-form" action="${url.service}" method="get">
+      	<form  id="${el}-options-form" action="${url.context}" method="get">
          <!-- Search panel -->
          <div id="${el}-search" class="hidden">
             <div class="yui-g">
@@ -44,7 +44,7 @@
                   <span class="crud-label">${msg("label.olduser")}:&nbsp;*</span>
              </div>
              <div class="field-row">
-                <input class="crud-input" id="${el}-create-olduser" type="text" maxlength="256" />
+                <input class="crud-input invalid" id="${el}-create-olduser" type="text" maxlength="256" />
              </div>
          </div>
          
@@ -62,47 +62,43 @@
          <div class="header-bar">${msg("label.itemstomigrate")}</div>
          
          <div class="field-row">
-         	<input type="checkbox" class="crud-input" id="${el}-items-sites" type="text" maxlength="256" />
+         	<input type="checkbox" class="crud-input" id="${el}-items-sites" type="text" maxlength="256" value="true"/>
          	<label class="crud-label" for="${el}-items-sites">${msg("label.items.sites")}</label>
          </div>
          
          <div class="field-row">
- 			<input type="checkbox" class="crud-input" id="${el}-items-groups" type="text" maxlength="256" />
+ 			<input type="checkbox" class="crud-input" id="${el}-items-groups" type="text" maxlength="256" value="true"/>
          	<label class="crud-label" for="${el}-items-groups">${msg("label.items.groups")}</label>
          </div>
          
          <div class="field-row">
- 			<input type="checkbox" class="crud-input" id="${el}-items-content" type="text" maxlength="256" />
+ 			<input type="checkbox" class="crud-input" id="${el}-items-content" type="text" maxlength="256" value="true"/>
          	<label class="crud-label" for="${el}-items-content">${msg("label.items.content")}</label>
          </div>
          
          <div class="field-row">
- 			<input type="checkbox" class="crud-input" id="${el}-items-comments" type="text" maxlength="256" />
+ 			<input type="checkbox" class="crud-input" id="${el}-items-comments" type="text" maxlength="256" value="true"/>
          	<label class="crud-label" for="${el}-items-comments">${msg("label.items.comments")}</label>
          </div>
          
          <div class="field-row">
- 			<input type="checkbox" class="crud-input" id="${el}-items-userhome" type="text" maxlength="256" />
+ 			<input type="checkbox" class="crud-input" id="${el}-items-userhome" type="text" maxlength="256" value="true"/>
          	<label class="crud-label" for="${el}-items-userhome">${msg("label.items.userhome")}</label>
          </div>
          
+        
          <div class="field-row">
- 			<input type="checkbox" class="crud-input" id="${el}-items-datauser" type="text" maxlength="256" />
-         	<label class="crud-label" for="${el}-items-datauser">${msg("label.items.datauser")}</label>
-         </div>
-         
-         <div class="field-row">
- 			<input type="checkbox" class="crud-input" id="${el}-items-likes" type="text" maxlength="256" />
+ 			<input type="checkbox" class="crud-input" id="${el}-items-likes" type="text" maxlength="256" value="true"/>
          	<label class="crud-label" for="${el}-items-likes">${msg("label.items.likes")}</label>
          </div>
          
          <div class="field-row">
- 			<input type="checkbox" class="crud-input" id="${el}-items-favorites" type="text" maxlength="256" />
+ 			<input type="checkbox" class="crud-input" id="${el}-items-favorites" type="text" maxlength="256" value="true"/>
          	<label class="crud-label" for="${el}-items-favorites">${msg("label.items.favorites")}</label>
          </div>
          
          <div class="field-row">
- 			<input type="checkbox" class="crud-input" id="${el}-items-workflows" type="text" maxlength="256" />
+ 			<input type="checkbox" class="crud-input" id="${el}-items-workflows" type="text" maxlength="256" value="true"/>
          	<label class="crud-label" for="${el}-items-workflows">${msg("label.items.workflows")}</label>
          </div>
          

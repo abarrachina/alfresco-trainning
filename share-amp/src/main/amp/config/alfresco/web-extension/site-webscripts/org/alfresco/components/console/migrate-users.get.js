@@ -20,8 +20,8 @@ function main() {
    
    // Widget instantiation metadata...
    var widget = {
-      id : "ConsoleUsers", 
-      name : "Alfresco.ConsoleUsers",
+      id : "ConsoleMigrateUsers", 
+      name : "Alfresco.ConsoleMigrateUsers",
       options : {
          minSearchTermLength: parseInt(minSearchTermLength),
          maxSearchResults: parseInt(maxSearchResults),
