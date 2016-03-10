@@ -9,9 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -20,7 +18,6 @@ import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.junit.Before;
@@ -38,9 +35,8 @@ import com.tradeshift.test.remote.RemoteTestRunner;
 
 @RunWith(RemoteTestRunner.class)
 @Remote(runnerClass = SpringJUnit4ClassRunner.class)
-//@RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:alfresco/application-context.xml")
-public class MigrateServiceTest {
+public class MigrateServiceUserHomeTest {
 
     private static String newuser = "NewUser";
     private static String olduser = "OldUser";
@@ -56,9 +52,6 @@ public class MigrateServiceTest {
     @Inject
     @InjectMocks
     private MigrateService migrateService;
-
-    @Mock
-    private AuthorityService authorityService;
 
     @Mock
     private PersonService personService;
@@ -78,15 +71,6 @@ public class MigrateServiceTest {
     public void setUp(){
         MockitoAnnotations.initMocks(this);
 
-        final Set<String> groupsOldUser = new HashSet<String>();
-        groupsOldUser.add("Group1");
-        groupsOldUser.add("Group2");
-        when(authorityService.getAuthoritiesForUser(olduser)).thenReturn(groupsOldUser);
-        final Set<String> groupsNewUser = new HashSet<String>();
-        groupsNewUser.add("Group3");
-        groupsNewUser.add("Group4");
-        when(authorityService.getAuthoritiesForUser(newuser)).thenReturn(groupsNewUser);
-
         when(personService.getPerson(olduser)).thenReturn(nodeRefOldUser);
         when(personService.getPerson(newuser)).thenReturn(nodeRefNewUser);
 
@@ -103,15 +87,6 @@ public class MigrateServiceTest {
         when(nodeService.getChildByName(eq(nodeRefNewHome), eq(ContentModel.ASSOC_CONTAINS), any(String.class))).thenReturn(null);
         when(nodeService.moveNode(nodeRefChild1OldUser, nodeRefNewHome,  ContentModel.ASSOC_CONTAINS, ContentModel.ASSOC_CHILDREN)).thenReturn(child2);
         when(nodeService.getType(any(NodeRef.class))).thenReturn(ContentModel.TYPE_CONTENT);
-
-    }
-
-    @Test
-    public void testMigrateGroups() {
-        migrateService.migrateGroups(olduser, newuser);
-        verify(authorityService, times(1)).addAuthority("Group1", newuser);
-        verify(authorityService, times(1)).addAuthority("Group2", newuser);
-
 
     }
 
