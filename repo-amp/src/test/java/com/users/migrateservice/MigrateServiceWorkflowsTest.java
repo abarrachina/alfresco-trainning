@@ -16,7 +16,6 @@ import javax.inject.Inject;
 
 import org.activiti.engine.TaskService;
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.workflow.BPMEngineRegistry;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.workflow.WorkflowPath;
@@ -32,17 +31,15 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.tradeshift.test.remote.Remote;
+import com.tradeshift.test.remote.RemoteTestRunner;
 
-@RunWith(PowerMockRunner.class)
+@RunWith(RemoteTestRunner.class)
 @Remote(runnerClass = SpringJUnit4ClassRunner.class)
-@PrepareForTest(BPMEngineRegistry.class)
+//@PrepareForTest(BPMEngineRegistry.class)
 @ContextConfiguration("classpath:alfresco/application-context.xml")
 public class MigrateServiceWorkflowsTest{
 
@@ -69,8 +66,8 @@ public class MigrateServiceWorkflowsTest{
     @Before
     public void setUp() {
 
-        PowerMockito.mockStatic(BPMEngineRegistry.class);
-        PowerMockito.when(BPMEngineRegistry.getLocalId(any(String.class))).thenReturn("task1");
+        //PowerMockito.mockStatic(BPMEngineRegistry.class);
+        //PowerMockito.when(BPMEngineRegistry.getLocalId(any(String.class))).thenReturn("task1");
 
         MockitoAnnotations.initMocks(this);
 
