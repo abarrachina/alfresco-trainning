@@ -70,4 +70,9 @@ public interface MigrateService{
      * @param newuser
      */
     public void migrateLikes (final String olduser, final String newuser);
+    
+    /***
+     * Migrate workflows from olduser to newuser
+     */
+    public void migrateWorkflows (final String olduser, final String newuser);
 }

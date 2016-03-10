@@ -1,16 +1,27 @@
 package com.users.migrateservice;
 
+
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.activiti.engine.TaskService;
+import org.activiti.engine.task.Comment;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authority.UnknownAuthorityException;
 import org.alfresco.service.cmr.preference.PreferenceService;
+import org.alfresco.repo.workflow.BPMEngine;
+import org.alfresco.repo.workflow.BPMEngineRegistry;
+import org.alfresco.repo.workflow.WorkflowConstants;
+import org.alfresco.repo.workflow.WorkflowNodeConverter;
+import org.alfresco.repo.workflow.WorkflowServiceImpl;
+import org.alfresco.repo.workflow.activiti.ActivitiNodeConverter;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -22,9 +33,18 @@ import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
+import org.alfresco.service.cmr.workflow.WorkflowInstance;
+import org.alfresco.service.cmr.workflow.WorkflowService;
+import org.alfresco.service.cmr.workflow.WorkflowTask;
+import org.alfresco.service.cmr.workflow.WorkflowTaskQuery;
+import org.alfresco.service.cmr.workflow.WorkflowTaskState;
+import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
+
+import com.google.gdata.data.Person;
+
 
 @Service
 public class MigrateServiceImpl implements MigrateService{
@@ -48,6 +68,13 @@ public class MigrateServiceImpl implements MigrateService{
 
     @Inject
     private BehaviourFilter policyBehaviourFilter;
+    
+    @Inject
+    private TaskService taskService;
+    
+    @Inject
+    private ServiceRegistry serviceRegistry;         
+
 
     @Inject
     private PreferenceService preferenceService;
@@ -69,7 +96,6 @@ public class MigrateServiceImpl implements MigrateService{
                 logger.debug("The authority "+ authority + " not exists " + ex.getMessage());
             }
         }
-
     }
 
     @Override
@@ -130,8 +156,8 @@ public class MigrateServiceImpl implements MigrateService{
                 logger.debug("File or folder exists in the destination");
             }
         }
-
     }
+
 
     @Override
     public void migratePreferences (final String olduser, final String newuser){
@@ -147,6 +173,71 @@ public class MigrateServiceImpl implements MigrateService{
         strQuery += "@cm\\:creator:\"" + olduser + "\"";
         changeCreator(strQuery, newuser);
     }
+
+
+    
+    
+    @Override
+    public void migrateWorkflows(String olduser, String newuser) {
+
+    	this.changeTaskAsignee(olduser, newuser).changeWorkflowInitiator(olduser, newuser);
+    } 
+    
+    private MigrateServiceImpl changeWorkflowInitiator(String olduser, String newuser){
+    	//Getting noderefs for every person
+    	final NodeRef oldUserNodeRef = personService.getPerson(olduser);
+        final NodeRef newUserNodeRef = personService.getPerson(newuser);
+       
+        
+        //Searching workflows
+        WorkflowTaskQuery query = new WorkflowTaskQuery();
+        WorkflowService workflowService = serviceRegistry.getWorkflowService();
+        final List<WorkflowTask> listTasks = workflowService.queryTasks(query, true);
+        for(WorkflowTask task: listTasks){ 
+        	WorkflowNodeConverter workflowNodeConverter = new ActivitiNodeConverter(serviceRegistry);
+
+        	final NodeRef currentInitiatorNodeRef = task.getPath().getInstance().getInitiator();
+        	String currentInitiator = (String)nodeService.getProperty(currentInitiatorNodeRef, ContentModel.PROP_USERNAME);
+			if (currentInitiator != null && currentInitiator.equalsIgnoreCase(olduser)) {
+
+				//Setting users
+				String taskId = BPMEngineRegistry.getLocalId(task.getId());				
+				Map<String, Object> variables = taskService.getVariables(taskId);
+		        variables.put(WorkflowConstants.PROP_INITIATOR, workflowNodeConverter.convertNode(newUserNodeRef));
+				taskService.setVariables(taskId, variables);				
+			}
+        }
+        return this;
+        
+	      
+    }
+    
+    /***
+     * Change asignee workflow tasks
+     */
+    private MigrateServiceImpl changeTaskAsignee(String olduser, String newuser){
+    	
+    	//Getting noderefs for every person
+    	final NodeRef oldUserNodeRef = personService.getPerson(olduser);
+        final NodeRef newUserNodeRef = personService.getPerson(newuser);
+        
+      //Searching workflows
+        WorkflowTaskQuery query = new WorkflowTaskQuery();        
+        WorkflowService workflowService = serviceRegistry.getWorkflowService();
+        final List<WorkflowTask> listTasks = workflowService.queryTasks(query, true);
+        for(WorkflowTask task: listTasks){ 
+			String assignee = (String) task.getProperties().get(QName.createQName("{http://www.alfresco.org/model/content/1.0}owner"));
+			String taskId = BPMEngineRegistry.getLocalId(task.getId());
+			
+			if (assignee != null && assignee.equalsIgnoreCase(olduser)) {
+				taskService.setAssignee(taskId, newuser);
+			}
+        }
+    	
+    	return this;
+    }
+    
+     
 
     /***
      * Change noderef's creator and modifier
@@ -200,5 +291,7 @@ public class MigrateServiceImpl implements MigrateService{
         policyBehaviourFilter.enableBehaviour(node, ContentModel.ASPECT_AUDITABLE);
 
     }
+   
+
 
 }

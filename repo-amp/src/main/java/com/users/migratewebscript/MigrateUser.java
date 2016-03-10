@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.extensions.webscripts.Cache;
@@ -50,8 +51,8 @@ public class MigrateUser extends DeclarativeWebScript {
     public void setPersonService(final PersonService  personService) {
         this. personService =  personService;
     }
-
-
+    
+    
     @Override
     protected Map<String, Object> executeImpl(final WebScriptRequest req, final Status status, final Cache cache) {
         final Map<String, Object> model = new HashMap<String, Object>();
@@ -73,6 +74,9 @@ public class MigrateUser extends DeclarativeWebScript {
         }
 
         if (personService.personExists(newuser)) {
+        	if ((workflows != null) && (workflows.equalsIgnoreCase("true"))){
+                migrateServiceImpl.migrateWorkflows(olduser, newuser);
+            }
             if ((sites != null) && (sites.equalsIgnoreCase("true"))){
                 migrateServiceImpl.migrateSites(olduser, newuser);
             }
@@ -95,6 +99,7 @@ public class MigrateUser extends DeclarativeWebScript {
             if ((favorites != null) && (favorites.equalsIgnoreCase("true"))){
                 migrateServiceImpl.migratePreferences(olduser, newuser);
             }
+
         }
 
         return model;
