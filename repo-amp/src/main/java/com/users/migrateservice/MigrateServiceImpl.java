@@ -2,6 +2,7 @@ package com.users.migrateservice;
 
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -196,16 +197,20 @@ public class MigrateServiceImpl implements MigrateService{
         for(WorkflowTask task: listTasks){ 
         	WorkflowNodeConverter workflowNodeConverter = new ActivitiNodeConverter(serviceRegistry);
 
+        	
         	final NodeRef currentInitiatorNodeRef = task.getPath().getInstance().getInitiator();
-        	String currentInitiator = (String)nodeService.getProperty(currentInitiatorNodeRef, ContentModel.PROP_USERNAME);
-			if (currentInitiator != null && currentInitiator.equalsIgnoreCase(olduser)) {
+        	if (nodeService.exists(currentInitiatorNodeRef)){
+            	String currentInitiator = (String)nodeService.getProperty(currentInitiatorNodeRef, ContentModel.PROP_USERNAME);
+    			if (currentInitiator != null && currentInitiator.equalsIgnoreCase(olduser)) {
 
-				//Setting users
-				String taskId = BPMEngineRegistry.getLocalId(task.getId());				
-				Map<String, Object> variables = taskService.getVariables(taskId);
-		        variables.put(WorkflowConstants.PROP_INITIATOR, workflowNodeConverter.convertNode(newUserNodeRef));
-				taskService.setVariables(taskId, variables);				
-			}
+    				//Setting users
+    				String taskId = BPMEngineRegistry.getLocalId(task.getId());				
+    				Map<String, Object> variables = taskService.getVariables(taskId);
+    		        variables.put(WorkflowConstants.PROP_INITIATOR, workflowNodeConverter.convertNode(newUserNodeRef));
+    				taskService.setVariables(taskId, variables);				
+    			}	
+        	}
+
         }
         return this;
         
@@ -246,13 +251,12 @@ public class MigrateServiceImpl implements MigrateService{
      * @param newuser
      */
     private void changeCreator(final String strQuery, final String newuser){
+        List<NodeRef> nodeRefs = new ArrayList<>();
         ResultSet results = null;
         try{
             results = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, strQuery);
-
-            for (final ResultSetRow result:results){
-
-                final NodeRef nodeRef = result.getNodeRef();
+            nodeRefs = results.getNodeRefs();            
+            for (final NodeRef nodeRef:nodeRefs){
                 changeCreatorModifier(nodeRef, newuser);
             }
         }
