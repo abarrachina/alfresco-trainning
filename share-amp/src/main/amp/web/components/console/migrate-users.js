@@ -112,7 +112,7 @@
 		OnMigrateUser: function ConsoleMigrateUsers_OnMigrateUser()
 		{
 
-			var olduser, newuser, me, sites, groups, content, comments, userhome, datauser, likes, favorites, workflows;
+			var olduser, newuser, me, sites, groups, content, comments, userhome, favorites, workflows;
 			me = this;
 			var fnGetter = function(id)
 			{
@@ -133,12 +133,11 @@
 			content = fnCheck("-items-content");
 			comments = fnCheck("-items-comments");
 			userhome = fnCheck("-items-userhome");
-			likes = fnCheck("-items-likes");
 			favorites = fnCheck("-items-favorites");
 			workflows = fnCheck("-items-workflows");        
 
 
-			var getValues = "newuser="+encodeURIComponent(newuser)+"&olduser="+encodeURIComponent(olduser)+"&sites="+sites+"&groups="+groups+"&content="+content+"&comments="+comments+"&userhome="+userhome+"&likes="+likes+"&favorites="+favorites+"&workflows="+workflows; 
+			var getValues = "newuser="+encodeURIComponent(newuser)+"&olduser="+encodeURIComponent(olduser)+"&sites="+sites+"&groups="+groups+"&content="+content+"&comments="+comments+"&userhome="+userhome+"&favorites="+favorites+"&workflows="+workflows; 
 
 			Alfresco.util.Ajax.request(
 					{
@@ -168,7 +167,6 @@
 								fnClearCheck("-items-content");
 								fnClearCheck("-items-comments");
 								fnClearCheck("-items-userhome");
-								fnClearCheck("-items-likes");
 								fnClearCheck("-items-favorites");
 								fnClearCheck("-items-workflows"); 
 
