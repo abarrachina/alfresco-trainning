@@ -3,7 +3,6 @@ package com.users.migrateservice;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,40 +10,32 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.activiti.engine.TaskService;
-import org.activiti.engine.task.Comment;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authority.UnknownAuthorityException;
-import org.alfresco.service.cmr.preference.PreferenceService;
-import org.alfresco.repo.workflow.BPMEngine;
 import org.alfresco.repo.workflow.BPMEngineRegistry;
 import org.alfresco.repo.workflow.WorkflowConstants;
 import org.alfresco.repo.workflow.WorkflowNodeConverter;
-import org.alfresco.repo.workflow.WorkflowServiceImpl;
 import org.alfresco.repo.workflow.activiti.ActivitiNodeConverter;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.preference.PreferenceService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
-import org.alfresco.service.cmr.workflow.WorkflowInstance;
 import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.cmr.workflow.WorkflowTask;
 import org.alfresco.service.cmr.workflow.WorkflowTaskQuery;
-import org.alfresco.service.cmr.workflow.WorkflowTaskState;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
-
-import com.google.gdata.data.Person;
 
 
 @Service
@@ -69,16 +60,29 @@ public class MigrateServiceImpl implements MigrateService{
 
     @Inject
     private BehaviourFilter policyBehaviourFilter;
-    
+
     @Inject
     private TaskService taskService;
-    
+
     @Inject
-    private ServiceRegistry serviceRegistry;         
+    private ServiceRegistry serviceRegistry;
 
 
     @Inject
     private PreferenceService preferenceService;
+
+    abstract class EngineService{
+        public abstract String getLocalId(final String id);
+    }
+
+    EngineService engineService = new EngineService(){
+
+        @Override
+        public String getLocalId (final String id){
+            return BPMEngineRegistry.getLocalId(id);
+        }
+
+    };
 
     @Override
     public void migrateSites(final String olduser, final String newuser) {
@@ -176,73 +180,73 @@ public class MigrateServiceImpl implements MigrateService{
     }
 
 
-    
-    
+
+
     @Override
-    public void migrateWorkflows(String olduser, String newuser) {
+    public void migrateWorkflows(final String olduser, final String newuser) {
 
-    	this.changeTaskAsignee(olduser, newuser).changeWorkflowInitiator(olduser, newuser);
-    } 
-    
-    private MigrateServiceImpl changeWorkflowInitiator(String olduser, String newuser){
-    	//Getting noderefs for every person
-    	final NodeRef oldUserNodeRef = personService.getPerson(olduser);
+        this.changeTaskAsignee(olduser, newuser).changeWorkflowInitiator(olduser, newuser);
+    }
+
+    private MigrateServiceImpl changeWorkflowInitiator(final String olduser, final String newuser){
+        //Getting noderefs for every person
+        final NodeRef oldUserNodeRef = personService.getPerson(olduser);
         final NodeRef newUserNodeRef = personService.getPerson(newuser);
-       
-        
+
+
         //Searching workflows
-        WorkflowTaskQuery query = new WorkflowTaskQuery();
-        WorkflowService workflowService = serviceRegistry.getWorkflowService();
+        final WorkflowTaskQuery query = new WorkflowTaskQuery();
+        final WorkflowService workflowService = serviceRegistry.getWorkflowService();
         final List<WorkflowTask> listTasks = workflowService.queryTasks(query, true);
-        for(WorkflowTask task: listTasks){ 
-        	WorkflowNodeConverter workflowNodeConverter = new ActivitiNodeConverter(serviceRegistry);
+        for(final WorkflowTask task: listTasks){
+            final WorkflowNodeConverter workflowNodeConverter = new ActivitiNodeConverter(serviceRegistry);
 
-        	
-        	final NodeRef currentInitiatorNodeRef = task.getPath().getInstance().getInitiator();
-        	if (nodeService.exists(currentInitiatorNodeRef)){
-            	String currentInitiator = (String)nodeService.getProperty(currentInitiatorNodeRef, ContentModel.PROP_USERNAME);
-    			if (currentInitiator != null && currentInitiator.equalsIgnoreCase(olduser)) {
 
-    				//Setting users
-    				String taskId = BPMEngineRegistry.getLocalId(task.getId());				
-    				Map<String, Object> variables = taskService.getVariables(taskId);
-    		        variables.put(WorkflowConstants.PROP_INITIATOR, workflowNodeConverter.convertNode(newUserNodeRef));
-    				taskService.setVariables(taskId, variables);				
-    			}	
-        	}
+            final NodeRef currentInitiatorNodeRef = task.getPath().getInstance().getInitiator();
+            if (nodeService.exists(currentInitiatorNodeRef)){
+                final String currentInitiator = (String)nodeService.getProperty(currentInitiatorNodeRef, ContentModel.PROP_USERNAME);
+                if ((currentInitiator != null) && currentInitiator.equalsIgnoreCase(olduser)) {
+
+                    //Setting users
+                    final String taskId = engineService.getLocalId(task.getId());
+                    final Map<String, Object> variables = taskService.getVariables(taskId);
+                    variables.put(WorkflowConstants.PROP_INITIATOR, workflowNodeConverter.convertNode(newUserNodeRef));
+                    taskService.setVariables(taskId, variables);
+                }
+            }
 
         }
         return this;
-        
-	      
+
+
     }
-    
+
     /***
      * Change asignee workflow tasks
      */
-    private MigrateServiceImpl changeTaskAsignee(String olduser, String newuser){
-    	
-    	//Getting noderefs for every person
-    	final NodeRef oldUserNodeRef = personService.getPerson(olduser);
+    private MigrateServiceImpl changeTaskAsignee(final String olduser, final String newuser){
+
+        //Getting noderefs for every person
+        final NodeRef oldUserNodeRef = personService.getPerson(olduser);
         final NodeRef newUserNodeRef = personService.getPerson(newuser);
-        
-      //Searching workflows
-        WorkflowTaskQuery query = new WorkflowTaskQuery();        
-        WorkflowService workflowService = serviceRegistry.getWorkflowService();
+
+        //Searching workflows
+        final WorkflowTaskQuery query = new WorkflowTaskQuery();
+        final WorkflowService workflowService = serviceRegistry.getWorkflowService();
         final List<WorkflowTask> listTasks = workflowService.queryTasks(query, true);
-        for(WorkflowTask task: listTasks){ 
-			String assignee = (String) task.getProperties().get(QName.createQName("{http://www.alfresco.org/model/content/1.0}owner"));
-			String taskId = BPMEngineRegistry.getLocalId(task.getId());
-			
-			if (assignee != null && assignee.equalsIgnoreCase(olduser)) {
-				taskService.setAssignee(taskId, newuser);
-			}
+        for(final WorkflowTask task: listTasks){
+            final String assignee = (String) task.getProperties().get(QName.createQName("{http://www.alfresco.org/model/content/1.0}owner"));
+            final String taskId = engineService.getLocalId(task.getId());
+
+            if ((assignee != null) && assignee.equalsIgnoreCase(olduser)) {
+                taskService.setAssignee(taskId, newuser);
+            }
         }
-    	
-    	return this;
+
+        return this;
     }
-    
-     
+
+
 
     /***
      * Change noderef's creator and modifier
@@ -255,7 +259,7 @@ public class MigrateServiceImpl implements MigrateService{
         ResultSet results = null;
         try{
             results = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, strQuery);
-            nodeRefs = results.getNodeRefs();            
+            nodeRefs = results.getNodeRefs();
             for (final NodeRef nodeRef:nodeRefs){
                 changeCreatorModifier(nodeRef, newuser);
             }
@@ -295,7 +299,7 @@ public class MigrateServiceImpl implements MigrateService{
         policyBehaviourFilter.enableBehaviour(node, ContentModel.ASPECT_AUDITABLE);
 
     }
-   
+
 
 
 }

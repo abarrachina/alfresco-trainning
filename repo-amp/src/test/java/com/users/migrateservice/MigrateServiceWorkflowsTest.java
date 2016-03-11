@@ -11,13 +11,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.activiti.engine.TaskService;
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.workflow.WorkflowNodeConverter;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.service.cmr.workflow.WorkflowDefinition;
+import org.alfresco.service.cmr.workflow.WorkflowInstance;
 import org.alfresco.service.cmr.workflow.WorkflowPath;
 import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.cmr.workflow.WorkflowTask;
@@ -36,15 +42,17 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.tradeshift.test.remote.Remote;
 import com.tradeshift.test.remote.RemoteTestRunner;
+import com.users.migrateservice.MigrateServiceImpl.EngineService;
 
 @RunWith(RemoteTestRunner.class)
 @Remote(runnerClass = SpringJUnit4ClassRunner.class)
-//@PrepareForTest(BPMEngineRegistry.class)
 @ContextConfiguration("classpath:alfresco/application-context.xml")
 public class MigrateServiceWorkflowsTest{
 
     private static String newuser = "NewUser";
     private static String olduser = "OldUser";
+    private static NodeRef nodeRefOldUser = new NodeRef("workspace://SpacesStore/oldnoderef");
+    private static NodeRef nodeRefNewUser = new NodeRef("workspace://SpacesStore/newnoderef");
     private static final String URI = "http://test";
     private final List<WorkflowTask> listTasks = new ArrayList<WorkflowTask>();
     @Inject
@@ -63,28 +71,40 @@ public class MigrateServiceWorkflowsTest{
     @Mock
     private ServiceRegistry serviceRegistry;
 
+    @Mock
+    private NodeService nodeService;
+
+    @Mock
+    private EngineService engineService;
+
+    @Mock
+    WorkflowNodeConverter workflowNodeConverter;
+
     @Before
     public void setUp() {
 
-        //PowerMockito.mockStatic(BPMEngineRegistry.class);
-        //PowerMockito.when(BPMEngineRegistry.getLocalId(any(String.class))).thenReturn("task1");
-
         MockitoAnnotations.initMocks(this);
-
 
         final Date date = new Date();
         final WorkflowTask task1 = makeTask(date);
+        final Map<String, Object> variables = new HashMap<String, Object>();
         listTasks.add(task1);
 
-
+        when(nodeService.getProperty(nodeRefOldUser, ContentModel.PROP_USERNAME)).thenReturn(olduser);
+        when(nodeService.exists(any(NodeRef.class))).thenReturn(true);
+        when(engineService.getLocalId(any(String.class))).thenReturn("task1");
         when(serviceRegistry.getWorkflowService()).thenReturn(workflowService);
         when(workflowService.queryTasks(any(WorkflowTaskQuery.class), eq(true))).thenReturn(listTasks);
+        when(taskService.getVariables("task1")).thenReturn(variables);
+        when(personService.getPerson(newuser)).thenReturn(nodeRefNewUser);
     }
 
     @Test
-    public void testMigrateGroups() {
+    public void testMigrateWorkflows() {
+
         migrateService.migrateWorkflows(olduser, newuser);
         verify(taskService, times(1)).setAssignee(any(String.class), eq(newuser));
+        verify(taskService, times(1)).setVariables(any(String.class), any(HashMap.class));
 
     }
 
@@ -94,7 +114,7 @@ public class MigrateServiceWorkflowsTest{
         final String name = "Task Name";
         final WorkflowTaskState state = WorkflowTaskState.IN_PROGRESS;
         final String title = "Task Title";
-        final WorkflowPath path = null;
+        final WorkflowPath path = makePath();
         final WorkflowTaskDefinition definition = null;
         final HashMap<QName, Serializable> properties = makeTaskProperties(date);
         return new WorkflowTask(id, definition, name, title, description, state, path, properties);
@@ -113,5 +133,15 @@ public class MigrateServiceWorkflowsTest{
         properties.put(testDate, date);
         return properties;
     }
+
+    protected WorkflowPath makePath()
+    {
+        final String id = "pathId$1";
+        final Date startDate = new Date();
+        final WorkflowDefinition definition = null;
+        final WorkflowInstance instance = new WorkflowInstance("",definition, null, nodeRefOldUser, null, null, true, startDate, null);
+        return new WorkflowPath(id, instance, null, true);
+    }
+
 
 }
