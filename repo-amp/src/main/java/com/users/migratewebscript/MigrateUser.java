@@ -19,6 +19,9 @@ package com.users.migratewebscript;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.action.Action;
+import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,7 +31,7 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-import com.users.migrateservice.MigrateService;
+import com.repo.action.executer.MigrateActionExecuter;
 
 /**
  * Java Migrate User Web Script.
@@ -39,10 +42,10 @@ public class MigrateUser extends DeclarativeWebScript {
 
     private static Log logger = LogFactory.getLog(MigrateUser.class);
 
-    private MigrateService migrateServiceImpl;
+    private ServiceRegistry serviceRegistry;
 
-    public void setMigrateService(final MigrateService migrateServiceImpl) {
-        this.migrateServiceImpl = migrateServiceImpl;
+    public void setServiceRegistry(final ServiceRegistry serviceRegistry) {
+        this.serviceRegistry = serviceRegistry;
     }
 
     private PersonService personService;
@@ -50,7 +53,6 @@ public class MigrateUser extends DeclarativeWebScript {
     public void setPersonService(final PersonService  personService) {
         this. personService =  personService;
     }
-
 
     @Override
     protected Map<String, Object> executeImpl(final WebScriptRequest req, final Status status, final Cache cache) {
@@ -72,29 +74,21 @@ public class MigrateUser extends DeclarativeWebScript {
         }
 
         if (personService.personExists(newuser)) {
-            if ((workflows != null) && (workflows.equalsIgnoreCase("true"))){
-                migrateServiceImpl.migrateWorkflows(olduser, newuser);
-            }
-            if ((sites != null) && (sites.equalsIgnoreCase("true"))){
-                migrateServiceImpl.migrateSites(olduser, newuser);
-            }
-            if ((groups != null) && (groups.equalsIgnoreCase("true"))){
-                migrateServiceImpl.migrateGroups(olduser, newuser);
-            }
-            if ((content != null) && (content.equalsIgnoreCase("true"))){
-                migrateServiceImpl.migrateContent(olduser, newuser);
-                migrateServiceImpl.migrateFolder(olduser, newuser);
-            }
-            if ((comments != null) && (comments.equalsIgnoreCase("true"))){
-                migrateServiceImpl.migrateComments(olduser, newuser);
-            }
-            if ((userhome != null) && (userhome.equalsIgnoreCase("true"))){
-                migrateServiceImpl.migrateUserHome(olduser, newuser);
-            }
-            if ((favorites != null) && (favorites.equalsIgnoreCase("true"))){
-                migrateServiceImpl.migratePreferences(olduser, newuser);
-            }
 
+            final ActionService actionService = serviceRegistry.getActionService();
+            final Action migrateAction = actionService.createAction(MigrateActionExecuter.NAME);
+
+            migrateAction.setParameterValue(MigrateActionExecuter.PARAM_NEW_USER, newuser);
+            migrateAction.setParameterValue(MigrateActionExecuter.PARAM_OLD_USER, olduser);
+            migrateAction.setParameterValue(MigrateActionExecuter.PARAM_SITES, sites);
+            migrateAction.setParameterValue(MigrateActionExecuter.PARAM_GROUPS, groups);
+            migrateAction.setParameterValue(MigrateActionExecuter.PARAM_CONTENT, content);
+            migrateAction.setParameterValue(MigrateActionExecuter.PARAM_COMMENT, comments);
+            migrateAction.setParameterValue(MigrateActionExecuter.PARAM_USERHOME, userhome);
+            migrateAction.setParameterValue(MigrateActionExecuter.PARAM_FAVORITES, favorites);
+            migrateAction.setParameterValue(MigrateActionExecuter.PARAM_WORKFLOWS, workflows);
+
+            actionService.executeAction(migrateAction, null, true, true);
         }
 
         return model;

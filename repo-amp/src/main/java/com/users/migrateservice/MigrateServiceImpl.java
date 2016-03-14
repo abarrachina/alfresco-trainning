@@ -18,6 +18,7 @@ import org.alfresco.repo.workflow.WorkflowConstants;
 import org.alfresco.repo.workflow.WorkflowNodeConverter;
 import org.alfresco.repo.workflow.activiti.ActivitiNodeConverter;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.lock.NodeLockedException;
 import org.alfresco.service.cmr.preference.PreferenceService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -26,6 +27,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AuthorityService;
+import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
@@ -66,6 +68,9 @@ public class MigrateServiceImpl implements MigrateService{
 
     @Inject
     private ServiceRegistry serviceRegistry;
+
+    @Inject
+    private OwnableService ownableService;
 
 
     @Inject
@@ -108,8 +113,13 @@ public class MigrateServiceImpl implements MigrateService{
         final Set<String> groups = authorityService.getAuthoritiesForUser(olduser);
 
         for (final String group:groups){
-            if (!authorityService.getAuthoritiesForUser(newuser).contains(group)){
-                authorityService.addAuthority(group, newuser);
+            try{
+                if (!authorityService.getAuthoritiesForUser(newuser).contains(group)){
+                    authorityService.addAuthority(group, newuser);
+                }
+            }
+            catch(final UnknownAuthorityException ex){
+                logger.debug("The authority "+ group + " not exists " + ex.getMessage());
             }
         }
     }
@@ -154,8 +164,15 @@ public class MigrateServiceImpl implements MigrateService{
             final NodeRef existNode = nodeService.getChildByName(homespaceNewUserNodeRef, ContentModel.ASSOC_CONTAINS, name);
 
             if (existNode == null){
-                final NodeRef newnode = nodeService.moveNode(node, homespaceNewUserNodeRef, ContentModel.ASSOC_CONTAINS, ContentModel.ASSOC_CHILDREN).getChildRef();
-                changeCreatorModifier(newnode, newuser);
+                try{
+                    final NodeRef newnode = nodeService.moveNode(node, homespaceNewUserNodeRef, ContentModel.ASSOC_CONTAINS, ContentModel.ASSOC_CHILDREN).getChildRef();
+                    changeCreatorModifier(newnode, newuser);
+                }
+                catch (final NodeLockedException e)
+                {
+                    logger.debug("The node " + node.toString() + " has locked");
+                }
+
             }
             else{
                 logger.debug("File or folder exists in the destination");
@@ -291,12 +308,18 @@ public class MigrateServiceImpl implements MigrateService{
         // Disable auditable aspect to allow change properties of cm:auditable aspect
         policyBehaviourFilter.disableBehaviour(node, ContentModel.ASPECT_AUDITABLE);
 
-        // Update properties of cm:auditable aspect
-        nodeService.setProperty(node, ContentModel.PROP_CREATOR, newuser);
-        nodeService.setProperty(node, ContentModel.PROP_MODIFIER, newuser);
-
-        // Enable auditable aspect
-        policyBehaviourFilter.enableBehaviour(node, ContentModel.ASPECT_AUDITABLE);
+        try
+        {
+            // Update properties of cm:auditable aspect
+            nodeService.setProperty(node, ContentModel.PROP_CREATOR, newuser);
+            ownableService.setOwner(node, newuser);
+            nodeService.setProperty(node, ContentModel.PROP_MODIFIER, newuser);
+        }
+        finally
+        {
+            // Enable auditable aspect
+            policyBehaviourFilter.enableBehaviour(node, ContentModel.ASPECT_AUDITABLE);
+        }
 
     }
 
