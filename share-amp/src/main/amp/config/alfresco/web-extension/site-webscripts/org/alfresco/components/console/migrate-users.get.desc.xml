@@ -1,0 +1,6 @@
+<webscript>
+  <shortname>Admin Console Migrate Users Tool</shortname>
+  <description>Administration Console - Migrate User Management Tool</description>
+  <url>/components/console/migrate-users</url>
+  <family>admin-console</family>
+</webscript>
