@@ -192,6 +192,8 @@ public class MigrateServiceImpl implements MigrateService{
 
             }
             else{
+                userHomeNotMigrate.add(node);
+                notMigrate.put("UserHome", (ArrayList<NodeRef>) userHomeNotMigrate);
                 logger.debug("File or folder exists in the destination");
             }
         }
