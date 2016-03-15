@@ -26,6 +26,13 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.users.migrateservice.MigrateService;
 
+/***
+ *
+ * @author nazareth.jimenez@ixxus.com
+ * Action Migrate User
+ *
+ */
+
 public class MigrateActionExecuter extends ActionExecuterAbstractBase
 {
     private static Log logger = LogFactory.getLog(MigrateActionExecuter.class);
