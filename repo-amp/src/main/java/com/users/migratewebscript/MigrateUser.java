@@ -19,6 +19,7 @@ package com.users.migratewebscript;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
@@ -88,7 +89,16 @@ public class MigrateUser extends DeclarativeWebScript {
             migrateAction.setParameterValue(MigrateActionExecuter.PARAM_FAVORITES, favorites);
             migrateAction.setParameterValue(MigrateActionExecuter.PARAM_WORKFLOWS, workflows);
 
-            actionService.executeAction(migrateAction, null, true, true);
+            AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Void>()
+            {
+                @Override
+                public Void doWork() throws Exception
+                {
+                    actionService.executeAction(migrateAction, null, true, true);
+                    return null;
+                }
+            }, AuthenticationUtil.getSystemUserName());
+
         }
 
         return model;
