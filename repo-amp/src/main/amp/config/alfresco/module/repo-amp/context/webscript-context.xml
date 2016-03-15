@@ -1,24 +1,47 @@
 <?xml version='1.0' encoding='UTF-8'?>
 
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <context:annotation-config />
-    <context:component-scan base-package="com.users.migratewebscript" />
- 
-    <import resource="service-context.xml"/>
-    
-    	<bean id="migrate-action" class="com.repo.action.executer.MigrateActionExecuter" parent="action-executer">
-			<property name="serviceRegistry" ref="ServiceRegistry" />
-			<property name="migrateService" ref="migrateServiceImpl" />
-			<property name="personService" ref="PersonService" />
-			<property name="searchService" ref="SearchService" />
-	 	</bean>
 
-		<bean id="webscript.users.migrateuser.post" class="com.users.migratewebscript.MigrateUser" parent="webscript">
-			<property name="serviceRegistry" ref="ServiceRegistry" />
-			<property name="personService" ref="PersonService" />
-		</bean>
+	<context:annotation-config />
+	<context:component-scan base-package="com.users.migratewebscript" />
+
+	<import resource="service-context.xml" />
+
+	<bean id="migrate-action" class="com.repo.action.executer.MigrateActionExecuter"
+		parent="action-executer">
+		<property name="serviceRegistry" ref="ServiceRegistry" />
+		<property name="migrateService" ref="migrateServiceImpl" />
+		<property name="personService" ref="PersonService" />
+		<property name="searchService" ref="SearchService" />
+	</bean>
+
+	<bean id="webscript.users.migrateuser.post" class="com.users.migratewebscript.MigrateUser"
+		parent="webscript">
+		<property name="serviceRegistry" ref="ServiceRegistry" />
+		<property name="personService" ref="PersonService" />
+	</bean>
+
+	<bean id="my_extension_mySqlSessionFactory" class="org.alfresco.ibatis.HierarchicalSqlSessionFactoryBean">
+
+		<property name="resourceLoader" ref="dialectResourceLoader" />
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation">
+			<value>classpath:alfresco/module/${project.artifactId}/ibatis/my-SqlMapConfig.xml
+			</value>
+		</property>
+
+	</bean>
+	<bean id="my_extension_SqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0"
+			ref="my_extension_mySqlSessionFactory" />
+	</bean>
+
+	<bean id="my_extension_myDAO" class="com.users.migrateservice.dao.ActivitiProcessDAOImpl">
+		<property name="template" ref="my_extension_SqlSessionTemplate" />
+	</bean>
+
+
 </beans>
