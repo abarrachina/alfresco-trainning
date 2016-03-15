@@ -70,7 +70,7 @@ public class MigrateUser extends DeclarativeWebScript {
         final String favorites = req.getParameter("favorites");
         final String workflows = req.getParameter("workflows");
 
-        if((newuser == null) || (olduser == null)){
+        if((newuser == null) || (olduser == null) || (newuser == "") || (olduser == "")){
             throw new WebScriptException("Missing mandatory params");
         }
 
