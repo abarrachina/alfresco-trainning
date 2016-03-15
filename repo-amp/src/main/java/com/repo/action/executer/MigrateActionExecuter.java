@@ -50,6 +50,9 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
     @Value("${mail.to.migration}")
     private String email;
 
+    @Value("${path.email.template}")
+    private String pathTemplate;
+
     private MigrateService migrateServiceImpl;
 
     public void setMigrateService(final MigrateService migrateServiceImpl) {
@@ -149,7 +152,7 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
         ResultSet rs;
         NodeRef template = null;
 
-        rs = searchService.query(storeRef, SearchService.LANGUAGE_LUCENE, "PATH:\"/app:company_home/app:dictionary/app:email_templates/cm:notify_user_email_migration.html.ftl\"");
+        rs = searchService.query(storeRef, SearchService.LANGUAGE_LUCENE, pathTemplate);
 
         if ((rs != null) && (rs.length()>0)) {
             template = rs.getNodeRef(0);
