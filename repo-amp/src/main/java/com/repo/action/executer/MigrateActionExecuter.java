@@ -2,14 +2,22 @@ package com.repo.action.executer;
 
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.alfresco.repo.action.ParameterDefinitionImpl;
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
+import org.alfresco.repo.action.executer.MailActionExecuter;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
+import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.ResultSet;
+import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,6 +49,19 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
     public void setPersonService(final PersonService  personService) {
         this. personService =  personService;
     }
+
+    private ServiceRegistry serviceRegistry;
+
+    public void setServiceRegistry(final ServiceRegistry serviceRegistry) {
+        this.serviceRegistry = serviceRegistry;
+    }
+
+    private SearchService searchService;
+
+    public void setSearchService(final SearchService searchService) {
+        this.searchService = searchService;
+    }
+
 
     @Override
     protected void addParameterDefinitions(final List<ParameterDefinition> paramList) {
@@ -100,6 +121,29 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
         if ((favorites != null) && (favorites.equalsIgnoreCase("true"))){
             migrateServiceImpl.migratePreferences(olduser, newuser);
         }
+
+        final ActionService actionService = serviceRegistry.getActionService();
+        final Action mailAction = actionService.createAction(MailActionExecuter.NAME);
+        mailAction.setParameterValue(MailActionExecuter.PARAM_SUBJECT, "Migration Information");
+
+        final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
+        ResultSet rs;
+        NodeRef template = null;
+
+        rs = searchService.query(storeRef, SearchService.LANGUAGE_LUCENE, "PATH:\"/app:company_home/app:dictionary/app:email_templates/cm:notify_user_email.html.ftl\"");
+        template = rs.getNodeRef(0);
+
+
+        mailAction.setParameterValue(MailActionExecuter.PARAM_TEMPLATE, template);
+
+        final Map<String, Serializable> templateArgs = new HashMap<String, Serializable>();
+        //templateArgs.put("contact", username);
+
+        mailAction.setParameterValue(MailActionExecuter.PARAM_TEMPLATE_MODEL,(Serializable)templateArgs);
+        actionService.executeAction(mailAction, null);
+
+
+
 
     }
 }

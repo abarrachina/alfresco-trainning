@@ -3,6 +3,7 @@ package com.users.migrateservice;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +22,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.lock.NodeLockedException;
 import org.alfresco.service.cmr.preference.PreferenceService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -89,29 +91,38 @@ public class MigrateServiceImpl implements MigrateService{
 
     };
 
+    private final Map<String, ArrayList<NodeRef>> notMigrate = new HashMap<String, ArrayList<NodeRef>>();
+
+    public Map<String, ArrayList<NodeRef>> getNotMigrate() {
+        return notMigrate;
+    }
+
     @Override
     public void migrateSites(final String olduser, final String newuser) {
         String authority = "";
         final List<SiteInfo> sites = siteService.listSites(olduser);
+        final List<NodeRef> sitesNotMigrate = notMigrate.get("Sites");
 
         for (final SiteInfo site: sites){
-            final String role = siteService.getMembersRole(site.getShortName(), olduser);
             try{
+                final String role = siteService.getMembersRole(site.getShortName(), olduser);
                 authority = "GROUP_site_"+site.getShortName()+"_"+role;
                 if (!authorityService.getAuthoritiesForUser(newuser).contains(authority)){
                     authorityService.addAuthority(authority, newuser);
                 }
             }
             catch(final UnknownAuthorityException ex){
+                sitesNotMigrate.add(site.getNodeRef());
                 logger.debug("The authority "+ authority + " not exists " + ex.getMessage());
             }
         }
+        notMigrate.put("Sites", (ArrayList<NodeRef>) sitesNotMigrate);
     }
 
     @Override
     public void migrateGroups(final String olduser, final String newuser) {
         final Set<String> groups = authorityService.getAuthoritiesForUser(olduser);
-
+        final List<NodeRef> groupsNotMigrate  = notMigrate.get("Groups");
         for (final String group:groups){
             try{
                 if (!authorityService.getAuthoritiesForUser(newuser).contains(group)){
@@ -119,9 +130,11 @@ public class MigrateServiceImpl implements MigrateService{
                 }
             }
             catch(final UnknownAuthorityException ex){
+                groupsNotMigrate.add(authorityService.getAuthorityNodeRef(group));
                 logger.debug("The authority "+ group + " not exists " + ex.getMessage());
             }
         }
+        notMigrate.put("Groups", (ArrayList<NodeRef>) groupsNotMigrate);
     }
 
     @Override
@@ -129,7 +142,7 @@ public class MigrateServiceImpl implements MigrateService{
         String strQuery="TYPE:\"{http://www.alfresco.org/model/content/1.0}content\"";
         strQuery += " AND ";
         strQuery += "@cm\\:creator:\"" + olduser + "\"";
-        changeCreator(strQuery, newuser);
+        changeCreator(strQuery, newuser, "Content");
 
     }
 
@@ -138,7 +151,7 @@ public class MigrateServiceImpl implements MigrateService{
         String strQuery="TYPE:\"{http://www.alfresco.org/model/content/1.0}folder\"";
         strQuery += " AND ";
         strQuery += "@cm\\:creator:\"" + olduser + "\"";
-        changeCreator(strQuery, newuser);
+        changeCreator(strQuery, newuser, "Folders");
 
     }
 
@@ -147,7 +160,7 @@ public class MigrateServiceImpl implements MigrateService{
         String strQuery="TYPE:\"fm\\:post\"";
         strQuery += " AND ";
         strQuery += "@cm\\:creator:\"" + olduser + "\"";
-        changeCreator(strQuery, newuser);
+        changeCreator(strQuery, newuser, "Comments");
 
     }
 
@@ -158,6 +171,8 @@ public class MigrateServiceImpl implements MigrateService{
         final NodeRef homespaceOldUserNodeRef = (NodeRef) nodeService.getProperty(oldUserNodeRef, ContentModel.PROP_HOMEFOLDER);
         final NodeRef homespaceNewUserNodeRef = (NodeRef) nodeService.getProperty(newUserNodeRef, ContentModel.PROP_HOMEFOLDER);
         final List<ChildAssociationRef> childs = nodeService.getChildAssocs(homespaceOldUserNodeRef);
+        final List<NodeRef> userHomeNotMigrate = notMigrate.get("UserHome");
+
         for (final ChildAssociationRef child:childs){
             final NodeRef node = child.getChildRef();
             final String name = (String) nodeService.getProperty(node, ContentModel.PROP_NAME);
@@ -166,10 +181,12 @@ public class MigrateServiceImpl implements MigrateService{
             if (existNode == null){
                 try{
                     final NodeRef newnode = nodeService.moveNode(node, homespaceNewUserNodeRef, ContentModel.ASSOC_CONTAINS, ContentModel.ASSOC_CHILDREN).getChildRef();
-                    changeCreatorModifier(newnode, newuser);
+                    changeCreatorModifier(newnode, newuser, "UserHome");
                 }
                 catch (final NodeLockedException e)
                 {
+                    userHomeNotMigrate.add(node);
+                    notMigrate.put("UserHome", (ArrayList<NodeRef>) userHomeNotMigrate);
                     logger.debug("The node " + node.toString() + " has locked");
                 }
 
@@ -179,7 +196,6 @@ public class MigrateServiceImpl implements MigrateService{
             }
         }
     }
-
 
     @Override
     public void migratePreferences (final String olduser, final String newuser){
@@ -193,11 +209,8 @@ public class MigrateServiceImpl implements MigrateService{
         String strQuery="TYPE:\"cm\\:rating\"";
         strQuery += " AND ";
         strQuery += "@cm\\:creator:\"" + olduser + "\"";
-        changeCreator(strQuery, newuser);
+        changeCreator(strQuery, newuser, "Likes");
     }
-
-
-
 
     @Override
     public void migrateWorkflows(final String olduser, final String newuser) {
@@ -235,7 +248,6 @@ public class MigrateServiceImpl implements MigrateService{
         }
         return this;
 
-
     }
 
     /***
@@ -263,22 +275,20 @@ public class MigrateServiceImpl implements MigrateService{
         return this;
     }
 
-
-
     /***
      * Change noderef's creator and modifier
      *
      * @param strQuery
      * @param newuser
      */
-    private void changeCreator(final String strQuery, final String newuser){
+    private void changeCreator(final String strQuery, final String newuser, final String typeContent){
         List<NodeRef> nodeRefs = new ArrayList<>();
         ResultSet results = null;
         try{
             results = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, strQuery);
             nodeRefs = results.getNodeRefs();
             for (final NodeRef nodeRef:nodeRefs){
-                changeCreatorModifier(nodeRef, newuser);
+                changeCreatorModifier(nodeRef, newuser, typeContent);
             }
         }
         finally{
@@ -296,15 +306,16 @@ public class MigrateServiceImpl implements MigrateService{
      * @param node
      * @param newuser
      */
-    private void changeCreatorModifier (final NodeRef node, final String newuser){
+    private void changeCreatorModifier (final NodeRef node, final String newuser, final String typeContent){
+
+        final List<NodeRef> contentNotMigrate = notMigrate.get(typeContent);
 
         if (nodeService.getType(node).equals(ContentModel.TYPE_FOLDER)){
             final List<ChildAssociationRef> childs = nodeService.getChildAssocs(node);
             for (final ChildAssociationRef child:childs){
-                changeCreatorModifier(child.getChildRef(), newuser);
+                changeCreatorModifier(child.getChildRef(), newuser, typeContent);
             }
         }
-
         // Disable auditable aspect to allow change properties of cm:auditable aspect
         policyBehaviourFilter.disableBehaviour(node, ContentModel.ASPECT_AUDITABLE);
 
@@ -315,14 +326,18 @@ public class MigrateServiceImpl implements MigrateService{
             ownableService.setOwner(node, newuser);
             nodeService.setProperty(node, ContentModel.PROP_MODIFIER, newuser);
         }
+        catch(final InvalidNodeRefException ex){
+            contentNotMigrate.add(node);
+            logger.debug("The noderef "+ node.toString() + " can't migrate " + ex.getMessage());
+        }
         finally
         {
             // Enable auditable aspect
             policyBehaviourFilter.enableBehaviour(node, ContentModel.ASPECT_AUDITABLE);
+            notMigrate.put(typeContent, (ArrayList<NodeRef>) contentNotMigrate);
         }
 
     }
-
 
 
 }

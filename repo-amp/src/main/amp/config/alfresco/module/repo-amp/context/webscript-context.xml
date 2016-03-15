@@ -9,9 +9,16 @@
     <context:component-scan base-package="com.users.migratewebscript" />
  
     <import resource="service-context.xml"/>
+    
+    	<bean id="migrate-action" class="com.repo.action.executer.MigrateActionExecuter" parent="action-executer">
+			<property name="serviceRegistry" ref="ServiceRegistry" />
+			<property name="migrateService" ref="migrateServiceImpl" />
+			<property name="personService" ref="PersonService" />
+			<property name="searchService" ref="SearchService" />
+	 	</bean>
 
 		<bean id="webscript.users.migrateuser.post" class="com.users.migratewebscript.MigrateUser" parent="webscript">
-			<property name="migrateService" ref="migrateServiceImpl" />
+			<property name="serviceRegistry" ref="ServiceRegistry" />
 			<property name="personService" ref="PersonService" />
 		</bean>
 </beans>
