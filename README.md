@@ -1,4 +1,4 @@
-# Alfresco Share Clipboard
+# Alfresco Migrate User
 
 This project defines a Module for adding a page in Admin Tools Section that allows migrating a user in another.
 
