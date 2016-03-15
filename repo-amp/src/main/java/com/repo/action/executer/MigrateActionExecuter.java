@@ -2,6 +2,7 @@ package com.repo.action.executer;
 
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.users.migrateservice.MigrateService;
 
@@ -37,6 +39,9 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
     public static final String PARAM_USERHOME = "userhome";
     public static final String PARAM_FAVORITES = "favorites";
     public static final String PARAM_WORKFLOWS = "workflows";
+
+    @Value("${mail.to.migration}")
+    private String email;
 
     private MigrateService migrateServiceImpl;
 
@@ -122,6 +127,13 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
             migrateServiceImpl.migratePreferences(olduser, newuser);
         }
 
+        sendEmail();
+    }
+
+    /***
+     * Send the email with the content that the process can't migrate
+     */
+    private void sendEmail(){
         final ActionService actionService = serviceRegistry.getActionService();
         final Action mailAction = actionService.createAction(MailActionExecuter.NAME);
         mailAction.setParameterValue(MailActionExecuter.PARAM_SUBJECT, "Migration Information");
@@ -130,20 +142,58 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
         ResultSet rs;
         NodeRef template = null;
 
-        rs = searchService.query(storeRef, SearchService.LANGUAGE_LUCENE, "PATH:\"/app:company_home/app:dictionary/app:email_templates/cm:notify_user_email.html.ftl\"");
-        template = rs.getNodeRef(0);
+        rs = searchService.query(storeRef, SearchService.LANGUAGE_LUCENE, "PATH:\"/app:company_home/app:dictionary/app:email_templates/cm:notify_user_email_migration.html.ftl\"");
 
+        if ((rs != null) && (rs.length()>0)) {
+            template = rs.getNodeRef(0);
 
-        mailAction.setParameterValue(MailActionExecuter.PARAM_TEMPLATE, template);
+            mailAction.setParameterValue(MailActionExecuter.PARAM_TEMPLATE, template);
+            mailAction.setParameterValue(MailActionExecuter.PARAM_TO, email);
 
+            final Map<String, Serializable> templateArgs = prepareTemplate();
+
+            mailAction.setParameterValue(MailActionExecuter.PARAM_TEMPLATE_MODEL,(Serializable)templateArgs);
+            actionService.executeAction(mailAction, null);
+        }
+        else{
+            logger.debug("The email template doesn't exist");
+        }
+
+    }
+
+    /***
+     *
+     * @return email template
+     */
+    private Map<String, Serializable> prepareTemplate(){
         final Map<String, Serializable> templateArgs = new HashMap<String, Serializable>();
-        //templateArgs.put("contact", username);
+        final Map<String, ArrayList<NodeRef>> notMigrate = migrateServiceImpl.getNotMigrate();
+        final ArrayList<NodeRef> sitesNotMigrate = notMigrate.get("Sites");
+        final ArrayList<NodeRef> groupsNotMigrate = notMigrate.get("Groups");
+        final ArrayList<NodeRef> contentNotMigrate = notMigrate.get("Content");
+        final ArrayList<NodeRef> foldersNotMigrate = notMigrate.get("Folders");
+        final ArrayList<NodeRef> commentsNotMigrate = notMigrate.get("Comments");
+        final ArrayList<NodeRef> userHomeNotMigrate = notMigrate.get("UserHome");
 
-        mailAction.setParameterValue(MailActionExecuter.PARAM_TEMPLATE_MODEL,(Serializable)templateArgs);
-        actionService.executeAction(mailAction, null);
+        if ((sitesNotMigrate != null) && (!sitesNotMigrate.isEmpty())){
+            templateArgs.put("sitesNotMigrate", sitesNotMigrate);
+        }
+        if ((groupsNotMigrate!= null) && (!sitesNotMigrate.isEmpty())){
+            templateArgs.put("groupsNotMigrate", groupsNotMigrate);
+        }
+        if (((contentNotMigrate) != null) && (!sitesNotMigrate.isEmpty())){
+            templateArgs.put("contentNotMigrate", contentNotMigrate);
+        }
+        if ((foldersNotMigrate!= null) && (!sitesNotMigrate.isEmpty())){
+            templateArgs.put("foldersNotMigrate", foldersNotMigrate);
+        }
+        if ((commentsNotMigrate!= null) && (!sitesNotMigrate.isEmpty())){
+            templateArgs.put("commentsNotMigrate", commentsNotMigrate);
+        }
+        if ((userHomeNotMigrate!= null) && (!sitesNotMigrate.isEmpty())){
+            templateArgs.put("userHomeNotMigrate", userHomeNotMigrate);
+        }
 
-
-
-
+        return templateArgs;
     }
 }

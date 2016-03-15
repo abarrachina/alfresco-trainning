@@ -1,5 +1,10 @@
 package com.users.migrateservice;
 
+import java.util.ArrayList;
+import java.util.Map;
+
+import org.alfresco.service.cmr.repository.NodeRef;
+
 /***
  *
  * @author nazareth.jimenez@ixxus.com
@@ -70,9 +75,15 @@ public interface MigrateService{
      * @param newuser
      */
     public void migrateLikes (final String olduser, final String newuser);
-    
+
     /***
      * Migrate workflows from olduser to newuser
      */
     public void migrateWorkflows (final String olduser, final String newuser);
+
+    /***
+     *
+     * @return Content that the process can't migrate
+     */
+    public Map<String, ArrayList<NodeRef>> getNotMigrate();
 }

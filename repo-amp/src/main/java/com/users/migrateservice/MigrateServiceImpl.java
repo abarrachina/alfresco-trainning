@@ -91,8 +91,9 @@ public class MigrateServiceImpl implements MigrateService{
 
     };
 
-    private final Map<String, ArrayList<NodeRef>> notMigrate = new HashMap<String, ArrayList<NodeRef>>();
+    final Map<String, ArrayList<NodeRef>> notMigrate = new HashMap<String, ArrayList<NodeRef>>();
 
+    @Override
     public Map<String, ArrayList<NodeRef>> getNotMigrate() {
         return notMigrate;
     }
@@ -101,7 +102,7 @@ public class MigrateServiceImpl implements MigrateService{
     public void migrateSites(final String olduser, final String newuser) {
         String authority = "";
         final List<SiteInfo> sites = siteService.listSites(olduser);
-        final List<NodeRef> sitesNotMigrate = notMigrate.get("Sites");
+        final List<NodeRef> sitesNotMigrate =  new ArrayList<NodeRef>();
 
         for (final SiteInfo site: sites){
             try{
@@ -122,7 +123,8 @@ public class MigrateServiceImpl implements MigrateService{
     @Override
     public void migrateGroups(final String olduser, final String newuser) {
         final Set<String> groups = authorityService.getAuthoritiesForUser(olduser);
-        final List<NodeRef> groupsNotMigrate  = notMigrate.get("Groups");
+        final List<NodeRef> groupsNotMigrate  = new ArrayList<NodeRef>();
+
         for (final String group:groups){
             try{
                 if (!authorityService.getAuthoritiesForUser(newuser).contains(group)){
@@ -171,7 +173,7 @@ public class MigrateServiceImpl implements MigrateService{
         final NodeRef homespaceOldUserNodeRef = (NodeRef) nodeService.getProperty(oldUserNodeRef, ContentModel.PROP_HOMEFOLDER);
         final NodeRef homespaceNewUserNodeRef = (NodeRef) nodeService.getProperty(newUserNodeRef, ContentModel.PROP_HOMEFOLDER);
         final List<ChildAssociationRef> childs = nodeService.getChildAssocs(homespaceOldUserNodeRef);
-        final List<NodeRef> userHomeNotMigrate = notMigrate.get("UserHome");
+        final List<NodeRef> userHomeNotMigrate = new ArrayList<NodeRef>();
 
         for (final ChildAssociationRef child:childs){
             final NodeRef node = child.getChildRef();
@@ -232,7 +234,6 @@ public class MigrateServiceImpl implements MigrateService{
         final List<WorkflowTask> listTasks = workflowService.queryTasks(query, true);
         for(final WorkflowTask task: listTasks){
             final WorkflowNodeConverter workflowNodeConverter = new ActivitiNodeConverter(serviceRegistry);
-
 
             final NodeRef currentInitiatorNodeRef = task.getPath().getInstance().getInitiator();
             if (nodeService.exists(currentInitiatorNodeRef)){
@@ -310,7 +311,14 @@ public class MigrateServiceImpl implements MigrateService{
      */
     private void changeCreatorModifier (final NodeRef node, final String newuser, final String typeContent){
 
-        final List<NodeRef> contentNotMigrate = notMigrate.get(typeContent);
+        List<NodeRef> contentNotMigrate = null;
+        if (typeContent == "UserHome"){
+            contentNotMigrate = notMigrate.get(typeContent);
+        }
+
+        if (contentNotMigrate == null){
+            contentNotMigrate = new ArrayList<NodeRef>();
+        }
 
         if (nodeService.getType(node).equals(ContentModel.TYPE_FOLDER)){
             final List<ChildAssociationRef> childs = nodeService.getChildAssocs(node);
@@ -318,6 +326,7 @@ public class MigrateServiceImpl implements MigrateService{
                 changeCreatorModifier(child.getChildRef(), newuser, typeContent);
             }
         }
+
         // Disable auditable aspect to allow change properties of cm:auditable aspect
         policyBehaviourFilter.disableBehaviour(node, ContentModel.ASPECT_AUDITABLE);
 
