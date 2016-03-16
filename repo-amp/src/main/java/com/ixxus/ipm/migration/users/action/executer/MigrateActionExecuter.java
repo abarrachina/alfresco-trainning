@@ -20,7 +20,6 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PersonService;
-import org.alfresco.service.cmr.workflow.WorkflowTask;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,10 +60,7 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
         this.migrateServiceImpl = migrateServiceImpl;
     }
 
-    private PersonService personService;
-
     public void setPersonService(final PersonService  personService) {
-        this. personService =  personService;
     }
 
     private ServiceRegistry serviceRegistry;
@@ -108,34 +104,34 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
 
         final String newuser = paramNewUser.toString();
         final String olduser = paramOldUser.toString();
-        final String sites = paramSites.toString();
-        final String groups = paramGroups.toString();
-        final String content = paramContent.toString();
-        final String comments = paramComment.toString();
-        final String userhome = paramUserHome.toString();
-        final String favorites = paramFavorites.toString();
-        final String workflows = paramWorkflows.toString();
+        final Boolean sites = (Boolean) paramSites;
+        final Boolean groups = (Boolean) paramGroups;
+        final Boolean content = (Boolean) paramContent;
+        final Boolean comments = (Boolean) paramComment;
+        final Boolean userhome = (Boolean) paramUserHome;
+        final Boolean favorites = (Boolean) paramFavorites;
+        final Boolean workflows = (Boolean) paramWorkflows;
 
-        if ((workflows != null) && (workflows.equalsIgnoreCase("true"))){
+        if ((workflows != null) && workflows){
             migrateServiceImpl.migrateWorkflows(olduser, newuser);
         }
-        if ((sites != null) && (sites.equalsIgnoreCase("true"))){
+        if ((sites != null) && sites){
             migrateServiceImpl.migrateSites(olduser, newuser);
         }
-        if ((groups != null) && (groups.equalsIgnoreCase("true"))){
+        if ((groups != null) && groups){
             migrateServiceImpl.migrateGroups(olduser, newuser);
         }
-        if ((content != null) && (content.equalsIgnoreCase("true"))){
+        if ((content != null) && content){
             migrateServiceImpl.migrateContent(olduser, newuser);
             migrateServiceImpl.migrateFolder(olduser, newuser);
         }
-        if ((comments != null) && (comments.equalsIgnoreCase("true"))){
+        if ((comments != null) && comments){
             migrateServiceImpl.migrateComments(olduser, newuser);
         }
-        if ((userhome != null) && (userhome.equalsIgnoreCase("true"))){
+        if ((userhome != null) && userhome){
             migrateServiceImpl.migrateUserHome(olduser, newuser);
         }
-        if ((favorites != null) && (favorites.equalsIgnoreCase("true"))){
+        if ((favorites != null) && favorites){
             migrateServiceImpl.migratePreferences(olduser, newuser);
         }
 
@@ -188,7 +184,7 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
         final ArrayList<NodeRef> userHomeNotMigrate = notMigrate.get(MigrateServiceImpl.KEY_ERROR_USERHOME);
         final ArrayList<String> taskInitiatorNoMigrated = taskNoMigrated.get(MigrateServiceImpl.KEY_ERROR_TASKINITIATOR);
         final ArrayList<NodeRef> taskAsigneeNoMigrated = notMigrate.get(MigrateServiceImpl.KEY_ERROR_TASKASIGNEE);
-        
+
 
         if ((sitesNotMigrate != null) && (!sitesNotMigrate.isEmpty())){
             templateArgs.put("sitesNotMigrate", sitesNotMigrate);
@@ -210,7 +206,7 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
         }
         if ((taskInitiatorNoMigrated!= null) && (!taskInitiatorNoMigrated.isEmpty())){
             templateArgs.put("taskInitiatorNoMigrated", taskInitiatorNoMigrated);
-        }        
+        }
         if ((taskAsigneeNoMigrated!= null) && (!taskAsigneeNoMigrated.isEmpty())){
             templateArgs.put("taskAsigneeNoMigrated", taskAsigneeNoMigrated);
         }

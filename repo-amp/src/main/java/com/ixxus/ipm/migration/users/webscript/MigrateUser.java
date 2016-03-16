@@ -24,8 +24,6 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.security.PersonService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
@@ -40,8 +38,6 @@ import com.ixxus.ipm.migration.users.action.executer.MigrateActionExecuter;
  * @author nazareth.jimenez@ixxus.com
  */
 public class MigrateUser extends DeclarativeWebScript {
-
-    private static Log logger = LogFactory.getLog(MigrateUser.class);
 
     private ServiceRegistry serviceRegistry;
 

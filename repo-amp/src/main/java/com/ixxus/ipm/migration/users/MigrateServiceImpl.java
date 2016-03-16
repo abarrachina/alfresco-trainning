@@ -11,11 +11,8 @@ import javax.inject.Inject;
 
 import org.activiti.engine.TaskService;
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.domain.activities.ActivitiesDAO;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authority.UnknownAuthorityException;
-import org.alfresco.repo.template.Workflow;
-import org.alfresco.repo.workflow.BPMEngine;
 import org.alfresco.repo.workflow.BPMEngineRegistry;
 import org.alfresco.repo.workflow.WorkflowConstants;
 import org.alfresco.repo.workflow.WorkflowNodeConverter;
@@ -35,13 +32,10 @@ import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
-import org.alfresco.service.cmr.workflow.WorkflowDefinition;
 import org.alfresco.service.cmr.workflow.WorkflowInstance;
 import org.alfresco.service.cmr.workflow.WorkflowInstanceQuery;
-import org.alfresco.service.cmr.workflow.WorkflowNode;
 import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.cmr.workflow.WorkflowTask;
-import org.alfresco.service.cmr.workflow.WorkflowTaskDefinition;
 import org.alfresco.service.cmr.workflow.WorkflowTaskQuery;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
@@ -62,7 +56,7 @@ import com.ixxus.ipm.migration.users.dao.ActivitiProcessDAO;
 public class MigrateServiceImpl implements MigrateService{
 
 
-	//Static properties
+    //Static properties
     public static final String KEY_ERROR_SITES = "Sites";
     public static final String KEY_ERROR_GROUPS = "Groups";
     public static final String KEY_ERROR_CONTENT = "Content";
@@ -70,8 +64,8 @@ public class MigrateServiceImpl implements MigrateService{
     public static final String KEY_ERROR_COMMENTS = "Comments";
     public static final String KEY_ERROR_USERHOME = "UserHome";
     public static final String KEY_ERROR_TASKINITIATOR = "TaskInitiator";
-    public static final String KEY_ERROR_TASKASIGNEE = "TaskAsignee";	
-	private static Log logger = LogFactory.getLog(MigrateServiceImpl.class);
+    public static final String KEY_ERROR_TASKASIGNEE = "TaskAsignee";
+    private static Log logger = LogFactory.getLog(MigrateServiceImpl.class);
 
     @Inject
     private PersonService personService;
@@ -99,17 +93,17 @@ public class MigrateServiceImpl implements MigrateService{
 
     @Inject
     private OwnableService ownableService;
-    
+
     @Inject
     private ActivitiProcessDAO activitiProcessDAO ;
 
     @Inject
     private PreferenceService preferenceService;
 
-    
+
     final Map<String, ArrayList<NodeRef>> notMigrate = new HashMap<String, ArrayList<NodeRef>>();
     final Map<String, ArrayList<String>> taskNoMigrated = new HashMap<String, ArrayList<String>>();
-    
+
     /**
      * Abstract property to get Local Id from task.
      * @author antoniobarrachina
@@ -132,10 +126,11 @@ public class MigrateServiceImpl implements MigrateService{
     public Map<String, ArrayList<NodeRef>> getNotMigrate() {
         return notMigrate;
     }
-    
+
+    @Override
     public Map<String, ArrayList<String>> getTaskNoMigrated() {
-		return taskNoMigrated;
-	}
+        return taskNoMigrated;
+    }
 
     @Override
     public void migrateSites(final String olduser, final String newuser) {
@@ -226,16 +221,16 @@ public class MigrateServiceImpl implements MigrateService{
                 }
                 catch (final NodeLockedException e)
                 {
-                    userHomeNotMigrate.add(node);                    
+                    userHomeNotMigrate.add(node);
                     logger.error("The node " + node.toString() + " has locked");
                 }
             }
             else{
-                userHomeNotMigrate.add(node);         
+                userHomeNotMigrate.add(node);
                 logger.error("File or folder exists in the destination");
             }
         }
-        
+
         //Adding no migrated elements
         notMigrate.put(KEY_ERROR_USERHOME, (ArrayList<NodeRef>) userHomeNotMigrate);
     }
@@ -248,152 +243,152 @@ public class MigrateServiceImpl implements MigrateService{
     }
 
     @Override
-    public void migrateWorkflows(String olduser, String newuser) {
-    	
-    	this.changeTaskAsignee(olduser, newuser).changeWorkflowInitiator(olduser, newuser);
-    }; 
-    
+    public void migrateWorkflows(final String olduser, final String newuser) {
+
+        this.changeTaskAsignee(olduser, newuser).changeWorkflowInitiator(olduser, newuser);
+    };
+
 
     /***
-	 * Get Workflows started by an user
-	 * @param oldUserNodeRef Workflow initiator
-	 * @return
-	 */
-	private List<WorkflowInstance> getWorkflowsByInitiator(NodeRef oldUserNodeRef) {
+     * Get Workflows started by an user
+     * @param oldUserNodeRef Workflow initiator
+     * @return
+     */
+    private List<WorkflowInstance> getWorkflowsByInitiator(final NodeRef oldUserNodeRef) {
 
-		// Searching workflows
-		final WorkflowInstanceQuery query = new WorkflowInstanceQuery();
-		Map<QName, Object> filters = new HashMap<QName, Object>();
-		filters.put(QName.createQName(NamespaceService.DEFAULT_URI, "initiator"), oldUserNodeRef);
-		query.setCustomProps(filters);
-		final WorkflowService workflowService = serviceRegistry.getWorkflowService();
-		return workflowService.getWorkflows(query);
-	}
+        // Searching workflows
+        final WorkflowInstanceQuery query = new WorkflowInstanceQuery();
+        final Map<QName, Object> filters = new HashMap<QName, Object>();
+        filters.put(QName.createQName(NamespaceService.DEFAULT_URI, "initiator"), oldUserNodeRef);
+        query.setCustomProps(filters);
+        final WorkflowService workflowService = serviceRegistry.getWorkflowService();
+        return workflowService.getWorkflows(query);
+    }
 
-	/***
-	 * Get Tasks for a workflow 
-	 * @param workflow Workflow instance
-	 * @return
-	 */
-	private List<WorkflowTask> getWorkflowTask(WorkflowInstance workflow) {
+    /***
+     * Get Tasks for a workflow
+     * @param workflow Workflow instance
+     * @return
+     */
+    private List<WorkflowTask> getWorkflowTask(final WorkflowInstance workflow) {
 
-		WorkflowTaskQuery query = new WorkflowTaskQuery();
-		query.setActive(null);
-		query.setWorkflowDefinitionName(workflow.getDefinition().getName());
-		final WorkflowService workflowService = serviceRegistry.getWorkflowService();
-		return workflowService.queryTasks(query, true);
-	}
+        final WorkflowTaskQuery query = new WorkflowTaskQuery();
+        query.setActive(null);
+        query.setWorkflowDefinitionName(workflow.getDefinition().getName());
+        final WorkflowService workflowService = serviceRegistry.getWorkflowService();
+        return workflowService.queryTasks(query, true);
+    }
 
-	/***
-	 * Migrate a task from olduser to newuser
-	 * @param task
-	 * @param olduser
-	 * @param newuser
-	 */
-	private void migrateUsersForWorkflow(WorkflowTask task, String olduser, String newuser) {
+    /***
+     * Migrate a task from olduser to newuser
+     * @param task
+     * @param olduser
+     * @param newuser
+     */
+    private void migrateUsersForWorkflow(final WorkflowTask task, final String olduser, final String newuser) {
 
-		final NodeRef newUserNodeRef = personService.getPerson(newuser);
-		final NodeRef homespaceNodeRef = (NodeRef) nodeService.getProperty(newUserNodeRef,
-				ContentModel.PROP_HOMEFOLDER); // Might be null
+        final NodeRef newUserNodeRef = personService.getPerson(newuser);
+        final NodeRef homespaceNodeRef = (NodeRef) nodeService.getProperty(newUserNodeRef,
+                ContentModel.PROP_HOMEFOLDER); // Might be null
 
-		final WorkflowNodeConverter workflowNodeConverter = new ActivitiNodeConverter(serviceRegistry);		
-		final NodeRef currentInitiatorNodeRef = task.getPath().getInstance().getInitiator();
-		if (nodeService.exists(currentInitiatorNodeRef)) {
-			final String currentInitiator = (String) nodeService.getProperty(currentInitiatorNodeRef,
-					ContentModel.PROP_USERNAME);
-			if ((currentInitiator != null) && currentInitiator.equalsIgnoreCase(olduser)) {
+        final WorkflowNodeConverter workflowNodeConverter = new ActivitiNodeConverter(serviceRegistry);
+        final NodeRef currentInitiatorNodeRef = task.getPath().getInstance().getInitiator();
+        if (nodeService.exists(currentInitiatorNodeRef)) {
+            final String currentInitiator = (String) nodeService.getProperty(currentInitiatorNodeRef,
+                    ContentModel.PROP_USERNAME);
+            if ((currentInitiator != null) && currentInitiator.equalsIgnoreCase(olduser)) {
 
-				// Setting users
-				final String taskId = engineService.getLocalId(task.getId());
-				final Map<String, Object> variables = taskService.getVariables(taskId);
-				variables.put(WorkflowConstants.PROP_INITIATOR, workflowNodeConverter.convertNode(newUserNodeRef));
-				variables.put(WorkflowConstants.PROP_INITIATOR_HOME,
-						workflowNodeConverter.convertNode(homespaceNodeRef));
-				taskService.setVariables(taskId, variables);
+                // Setting users
+                final String taskId = engineService.getLocalId(task.getId());
+                final Map<String, Object> variables = taskService.getVariables(taskId);
+                variables.put(WorkflowConstants.PROP_INITIATOR, workflowNodeConverter.convertNode(newUserNodeRef));
+                variables.put(WorkflowConstants.PROP_INITIATOR_HOME,
+                        workflowNodeConverter.convertNode(homespaceNodeRef));
+                taskService.setVariables(taskId, variables);
 
-			}
-		}
-	}
+            }
+        }
+    }
 
-	/***
-	 * Change workflow initiator and initiator home.
-	 * @param olduser
-	 * @param newuser
-	 * @return
-	 */
-	private MigrateServiceImpl changeWorkflowInitiator(final String olduser, final String newuser) {
+    /***
+     * Change workflow initiator and initiator home.
+     * @param olduser
+     * @param newuser
+     * @return
+     */
+    private MigrateServiceImpl changeWorkflowInitiator(final String olduser, final String newuser) {
 
-		// Getting noderefs for every person
-		final NodeRef oldUserNodeRef = personService.getPerson(olduser);		
-		final List<WorkflowInstance> listWorkflows = getWorkflowsByInitiator(oldUserNodeRef);
-		ArrayList<String> workflowsOwnerNoMigrated = new ArrayList<>();
-		
-		for (final WorkflowInstance workflow : listWorkflows) {			
-			List<WorkflowTask> tasks = this.getWorkflowTask(workflow);			
-			for (final WorkflowTask task : tasks){
-				try{
-					this.migrateUsersForWorkflow(task, olduser, newuser);
-				}catch (Exception e) {					
-					workflowsOwnerNoMigrated.add(task.getId()+ " " +task.getName());                    
+        // Getting noderefs for every person
+        final NodeRef oldUserNodeRef = personService.getPerson(olduser);
+        final List<WorkflowInstance> listWorkflows = getWorkflowsByInitiator(oldUserNodeRef);
+        final ArrayList<String> workflowsOwnerNoMigrated = new ArrayList<>();
+
+        for (final WorkflowInstance workflow : listWorkflows) {
+            final List<WorkflowTask> tasks = this.getWorkflowTask(workflow);
+            for (final WorkflowTask task : tasks){
+                try{
+                    this.migrateUsersForWorkflow(task, olduser, newuser);
+                }catch (final Exception e) {
+                    workflowsOwnerNoMigrated.add(task.getId()+ " " +task.getName());
                     logger.error("Failing setting initiator");
-				}				
-			}
-		}
-		if (true){
-			//Require method to migrate the task that "I've started"
-			// This value is not getted from the Initiator or Initiator_Home variable, so this step is required
-			this.forceMigrateInitiator(olduser, newuser);
-		}
-		
-		//Setting workflows error map
-		this.taskNoMigrated.put(KEY_ERROR_TASKINITIATOR, workflowsOwnerNoMigrated);
-		
-		return this;
-	}
-	
-	/***
-	 * Updated starteruser from DB 
-	 * @param olduser
-	 * @param newuser
-	 */
-	private void forceMigrateInitiator(String olduser, String newuser){
-	
-		ProcessStarterUser processStarterUser = new ProcessStarterUser(olduser, newuser);
-		this.activitiProcessDAO.executeUpdateAuthor(processStarterUser);
-	}
+                }
+            }
+        }
+        if (true){
+            //Require method to migrate the task that "I've started"
+            // This value is not getted from the Initiator or Initiator_Home variable, so this step is required
+            this.forceMigrateInitiator(olduser, newuser);
+        }
 
-	/***
-	 * Change asignee workflow tasks
-	 */
-	private MigrateServiceImpl changeTaskAsignee(final String olduser, final String newuser) {
+        //Setting workflows error map
+        this.taskNoMigrated.put(KEY_ERROR_TASKINITIATOR, workflowsOwnerNoMigrated);
 
-		// Searching workflows with olduser like asignee
-		final WorkflowTaskQuery query = new WorkflowTaskQuery();
-		query.setActorId(olduser);
-		final WorkflowService workflowService = serviceRegistry.getWorkflowService();
-		final List<WorkflowTask> listTasks = workflowService.queryTasks(query, true);
-		ArrayList<String> workflowsAsigneeNoMigrated = new ArrayList<>();
-		//For every task we will set de asignee.
-		for (final WorkflowTask task : listTasks) {
-			final String assignee = (String) task.getProperties()
-					.get(QName.createQName("{http://www.alfresco.org/model/content/1.0}owner"));
-			try{
-				final String taskId = engineService.getLocalId(task.getId());
+        return this;
+    }
 
-				if ((assignee != null) && assignee.equalsIgnoreCase(olduser)) {
-					taskService.setAssignee(taskId, newuser);
-				}
-			}catch(Exception e){
-				workflowsAsigneeNoMigrated.add(task.getId()+ " " +task.getName());                    
+    /***
+     * Updated starteruser from DB
+     * @param olduser
+     * @param newuser
+     */
+    private void forceMigrateInitiator(final String olduser, final String newuser){
+
+        final ProcessStarterUser processStarterUser = new ProcessStarterUser(olduser, newuser);
+        this.activitiProcessDAO.executeUpdateAuthor(processStarterUser);
+    }
+
+    /***
+     * Change asignee workflow tasks
+     */
+    private MigrateServiceImpl changeTaskAsignee(final String olduser, final String newuser) {
+
+        // Searching workflows with olduser like asignee
+        final WorkflowTaskQuery query = new WorkflowTaskQuery();
+        query.setActorId(olduser);
+        final WorkflowService workflowService = serviceRegistry.getWorkflowService();
+        final List<WorkflowTask> listTasks = workflowService.queryTasks(query, true);
+        final ArrayList<String> workflowsAsigneeNoMigrated = new ArrayList<>();
+        //For every task we will set de asignee.
+        for (final WorkflowTask task : listTasks) {
+            final String assignee = (String) task.getProperties()
+                    .get(QName.createQName("{http://www.alfresco.org/model/content/1.0}owner"));
+            try{
+                final String taskId = engineService.getLocalId(task.getId());
+
+                if ((assignee != null) && assignee.equalsIgnoreCase(olduser)) {
+                    taskService.setAssignee(taskId, newuser);
+                }
+            }catch(final Exception e){
+                workflowsAsigneeNoMigrated.add(task.getId()+ " " +task.getName());
                 logger.error("Failing setting asignee");
-			}
-		}
-		
-		//Setting workflows error map
-		this.taskNoMigrated.put(KEY_ERROR_TASKASIGNEE, workflowsAsigneeNoMigrated);
+            }
+        }
 
-		return this;
-	}
+        //Setting workflows error map
+        this.taskNoMigrated.put(KEY_ERROR_TASKASIGNEE, workflowsAsigneeNoMigrated);
+
+        return this;
+    }
 
     /***
      * Change noderef's creator and modifier

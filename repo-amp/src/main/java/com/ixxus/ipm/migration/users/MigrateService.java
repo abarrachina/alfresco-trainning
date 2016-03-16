@@ -1,11 +1,9 @@
 package com.ixxus.ipm.migration.users;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.workflow.WorkflowTask;
 
 /***
  *
@@ -80,6 +78,6 @@ public interface MigrateService{
      * @return Content that the process can't migrate
      */
     public Map<String, ArrayList<NodeRef>> getNotMigrate();
-    
+
     public Map<String, ArrayList<String>> getTaskNoMigrated();
 }
