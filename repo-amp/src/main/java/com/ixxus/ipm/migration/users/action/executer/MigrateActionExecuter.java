@@ -1,4 +1,4 @@
-package com.repo.action.executer;
+package com.ixxus.ipm.migration.users.action.executer;
 
 
 import java.io.Serializable;
@@ -25,8 +25,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.users.migrateservice.MigrateService;
-import com.users.migrateservice.MigrateServiceImpl;
+import com.ixxus.ipm.migration.users.MigrateService;
+import com.ixxus.ipm.migration.users.MigrateServiceImpl;
 
 /***
  *

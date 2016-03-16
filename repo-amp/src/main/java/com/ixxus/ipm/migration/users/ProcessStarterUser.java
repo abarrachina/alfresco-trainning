@@ -1,4 +1,4 @@
-package com.users.migrateservice;
+package com.ixxus.ipm.migration.users;
 
 public class ProcessStarterUser {
 	

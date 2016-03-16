@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-package com.users.migratewebscript;
+package com.ixxus.ipm.migration.users.webscript;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +32,7 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptException;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-import com.repo.action.executer.MigrateActionExecuter;
+import com.ixxus.ipm.migration.users.action.executer.MigrateActionExecuter;
 
 /**
  * Java Migrate User Web Script.

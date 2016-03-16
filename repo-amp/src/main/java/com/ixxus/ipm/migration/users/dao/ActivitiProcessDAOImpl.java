@@ -1,8 +1,8 @@
-package com.users.migrateservice.dao;
+package com.ixxus.ipm.migration.users.dao;
 
 import org.mybatis.spring.SqlSessionTemplate;
 
-import com.users.migrateservice.ProcessStarterUser;
+import com.ixxus.ipm.migration.users.ProcessStarterUser;
 
 public class ActivitiProcessDAOImpl implements ActivitiProcessDAO {
 
@@ -21,7 +21,7 @@ public class ActivitiProcessDAOImpl implements ActivitiProcessDAO {
 	}
 	
 	public int executeUpdateAuthor (ProcessStarterUser input){
-		return this.template.update("my_extension.update_author", input);
+		return this.template.update("workflow-initiator.update_starter_user", input);
 	}
 }
  

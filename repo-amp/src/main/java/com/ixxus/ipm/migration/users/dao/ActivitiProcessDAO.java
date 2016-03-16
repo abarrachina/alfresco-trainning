@@ -1,6 +1,6 @@
-package com.users.migrateservice.dao;
+package com.ixxus.ipm.migration.users.dao;
 
-import com.users.migrateservice.ProcessStarterUser;
+import com.ixxus.ipm.migration.users.ProcessStarterUser;
 
 public interface ActivitiProcessDAO {
 

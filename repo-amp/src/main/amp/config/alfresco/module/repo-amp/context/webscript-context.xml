@@ -6,11 +6,11 @@
 
 
 	<context:annotation-config />
-	<context:component-scan base-package="com.users.migratewebscript" />
+	<context:component-scan base-package="com.ixxus.ipm.migration.users.webscript" />
 
 	<import resource="service-context.xml" />
 
-	<bean id="migrate-action" class="com.repo.action.executer.MigrateActionExecuter"
+	<bean id="migrate-action" class="com.ixxus.ipm.migration.users.action.executer.MigrateActionExecuter"
 		parent="action-executer">
 		<property name="serviceRegistry" ref="ServiceRegistry" />
 		<property name="migrateService" ref="migrateServiceImpl" />
@@ -18,7 +18,7 @@
 		<property name="searchService" ref="SearchService" />
 	</bean>
 
-	<bean id="webscript.users.migrateuser.post" class="com.users.migratewebscript.MigrateUser"
+	<bean id="webscript.users.migrateuser.post" class="com.ixxus.ipm.migration.users.webscript.MigrateUser"
 		parent="webscript">
 		<property name="serviceRegistry" ref="ServiceRegistry" />
 		<property name="personService" ref="PersonService" />
@@ -29,7 +29,7 @@
 		<property name="resourceLoader" ref="dialectResourceLoader" />
 		<property name="dataSource" ref="dataSource" />
 		<property name="configLocation">
-			<value>classpath:alfresco/module/${project.artifactId}/ibatis/my-SqlMapConfig.xml
+			<value>classpath:alfresco/module/${project.artifactId}/ibatis/workflow-initiator-SqlMapConfig.xml
 			</value>
 		</property>
 
@@ -39,7 +39,7 @@
 			ref="my_extension_mySqlSessionFactory" />
 	</bean>
 
-	<bean id="my_extension_myDAO" class="com.users.migrateservice.dao.ActivitiProcessDAOImpl">
+	<bean id="my_extension_myDAO" class="com.ixxus.ipm.migration.users.dao.ActivitiProcessDAOImpl">
 		<property name="template" ref="my_extension_SqlSessionTemplate" />
 	</bean>
 

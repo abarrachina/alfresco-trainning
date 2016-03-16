@@ -1,4 +1,4 @@
-package com.users.migrateservice;
+package com.ixxus.ipm.migration.users;
 
 
 import static org.junit.Assert.assertNotNull;
@@ -21,6 +21,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.ixxus.ipm.migration.users.MigrateService;
 import com.tradeshift.test.remote.Remote;
 import com.tradeshift.test.remote.RemoteTestRunner;
 

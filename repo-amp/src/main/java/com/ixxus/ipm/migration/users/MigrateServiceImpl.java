@@ -1,4 +1,4 @@
-package com.users.migrateservice;
+package com.ixxus.ipm.migration.users;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
 
-import com.users.migrateservice.dao.ActivitiProcessDAO;
+import com.ixxus.ipm.migration.users.dao.ActivitiProcessDAO;
 
 
 /***
