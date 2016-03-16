@@ -5,6 +5,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.workflow.WorkflowDefinition;
 import org.alfresco.service.cmr.workflow.WorkflowInstance;
+import org.alfresco.service.cmr.workflow.WorkflowInstanceQuery;
 import org.alfresco.service.cmr.workflow.WorkflowPath;
 import org.alfresco.service.cmr.workflow.WorkflowService;
 import org.alfresco.service.cmr.workflow.WorkflowTask;
@@ -42,6 +44,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.ixxus.ipm.migration.users.MigrateService;
 import com.ixxus.ipm.migration.users.MigrateServiceImpl.EngineService;
+import com.ixxus.ipm.migration.users.dao.ActivitiProcessDAO;
+import com.sun.xml.ws.api.pipe.FiberContextSwitchInterceptor.Work;
 import com.tradeshift.test.remote.Remote;
 import com.tradeshift.test.remote.RemoteTestRunner;
 
@@ -54,8 +58,10 @@ public class MigrateServiceWorkflowsTest{
     private static String olduser = "OldUser";
     private static NodeRef nodeRefOldUser = new NodeRef("workspace://SpacesStore/oldnoderef");
     private static NodeRef nodeRefNewUser = new NodeRef("workspace://SpacesStore/newnoderef");
+    private static NodeRef nodeRefUserHome = new NodeRef("workspace://SpacesStore/nodeRefUserHome");
     private static final String URI = "http://test";
     private final List<WorkflowTask> listTasks = new ArrayList<WorkflowTask>();
+    private final List<WorkflowInstance> listWorkflows = new ArrayList<WorkflowInstance>();
     @Inject
     @InjectMocks
     private MigrateService migrateService;
@@ -80,6 +86,10 @@ public class MigrateServiceWorkflowsTest{
 
     @Mock
     WorkflowNodeConverter workflowNodeConverter;
+    
+    @Mock
+    ActivitiProcessDAO activitiProcessDAO ;
+    
 
     @Before
     public void setUp() {
@@ -88,14 +98,19 @@ public class MigrateServiceWorkflowsTest{
 
         final Date date = new Date();
         final WorkflowTask task1 = makeTask(date);
+        final WorkflowInstance workflowInstance = makeWorkflowInstance();
         final Map<String, Object> variables = new HashMap<String, Object>();
         listTasks.add(task1);
-
+        listWorkflows.add(workflowInstance);
+        
         when(nodeService.getProperty(nodeRefOldUser, ContentModel.PROP_USERNAME)).thenReturn(olduser);
+        when(nodeService.getProperty(nodeRefNewUser, ContentModel.PROP_USERNAME)).thenReturn(newuser);
+        when(nodeService.getProperty(nodeRefNewUser, ContentModel.PROP_HOMEFOLDER)).thenReturn(nodeRefUserHome);
         when(nodeService.exists(any(NodeRef.class))).thenReturn(true);
         when(engineService.getLocalId(any(String.class))).thenReturn("task1");
         when(serviceRegistry.getWorkflowService()).thenReturn(workflowService);
         when(workflowService.queryTasks(any(WorkflowTaskQuery.class), eq(true))).thenReturn(listTasks);
+        when(workflowService.getWorkflows(any(WorkflowInstanceQuery.class))).thenReturn(listWorkflows);
         when(taskService.getVariables("task1")).thenReturn(variables);
         when(personService.getPerson(newuser)).thenReturn(nodeRefNewUser);
     }
@@ -106,9 +121,18 @@ public class MigrateServiceWorkflowsTest{
         migrateService.migrateWorkflows(olduser, newuser);
         verify(taskService, times(1)).setAssignee(any(String.class), eq(newuser));
         verify(taskService, times(1)).setVariables(any(String.class), any(HashMap.class));
+        verify(activitiProcessDAO,times(1)).executeUpdateAuthor(any(ProcessStarterUser.class));
 
     }
 
+    protected WorkflowInstance makeWorkflowInstance() {        
+    	
+        WorkflowInstance workflowInstance = mock(WorkflowInstance.class);
+        WorkflowDefinition workflowDefinition = mock(WorkflowDefinition.class);
+        when(workflowInstance.getDefinition()).thenReturn(workflowDefinition);
+        return workflowInstance;
+    }
+    
     protected WorkflowTask makeTask(final Date date) {
         final String description = "Task Description";
         final String id = "task1";
