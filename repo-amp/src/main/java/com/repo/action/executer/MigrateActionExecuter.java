@@ -20,11 +20,13 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.service.cmr.workflow.WorkflowTask;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.users.migrateservice.MigrateService;
+import com.users.migrateservice.MigrateServiceImpl;
 
 /***
  *
@@ -168,7 +170,6 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
         else{
             logger.debug("The email template doesn't exist");
         }
-
     }
 
     /***
@@ -178,12 +179,16 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
     private Map<String, Serializable> prepareTemplate(){
         final Map<String, Serializable> templateArgs = new HashMap<String, Serializable>();
         final Map<String, ArrayList<NodeRef>> notMigrate = migrateServiceImpl.getNotMigrate();
-        final ArrayList<NodeRef> sitesNotMigrate = notMigrate.get("Sites");
-        final ArrayList<NodeRef> groupsNotMigrate = notMigrate.get("Groups");
-        final ArrayList<NodeRef> contentNotMigrate = notMigrate.get("Content");
-        final ArrayList<NodeRef> foldersNotMigrate = notMigrate.get("Folders");
-        final ArrayList<NodeRef> commentsNotMigrate = notMigrate.get("Comments");
-        final ArrayList<NodeRef> userHomeNotMigrate = notMigrate.get("UserHome");
+        final Map<String, ArrayList<String>> taskNoMigrated = migrateServiceImpl.getTaskNoMigrated();
+        final ArrayList<NodeRef> sitesNotMigrate = notMigrate.get(MigrateServiceImpl.KEY_ERROR_SITES);
+        final ArrayList<NodeRef> groupsNotMigrate = notMigrate.get(MigrateServiceImpl.KEY_ERROR_GROUPS);
+        final ArrayList<NodeRef> contentNotMigrate = notMigrate.get(MigrateServiceImpl.KEY_ERROR_CONTENT);
+        final ArrayList<NodeRef> foldersNotMigrate = notMigrate.get(MigrateServiceImpl.KEY_ERROR_FOLDERS);
+        final ArrayList<NodeRef> commentsNotMigrate = notMigrate.get(MigrateServiceImpl.KEY_ERROR_COMMENTS);
+        final ArrayList<NodeRef> userHomeNotMigrate = notMigrate.get(MigrateServiceImpl.KEY_ERROR_USERHOME);
+        final ArrayList<String> taskInitiatorNoMigrated = taskNoMigrated.get(MigrateServiceImpl.KEY_ERROR_TASKINITIATOR);
+        final ArrayList<NodeRef> taskAsigneeNoMigrated = notMigrate.get(MigrateServiceImpl.KEY_ERROR_TASKASIGNEE);
+        
 
         if ((sitesNotMigrate != null) && (!sitesNotMigrate.isEmpty())){
             templateArgs.put("sitesNotMigrate", sitesNotMigrate);
@@ -202,6 +207,12 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
         }
         if ((userHomeNotMigrate!= null) && (!sitesNotMigrate.isEmpty())){
             templateArgs.put("userHomeNotMigrate", userHomeNotMigrate);
+        }
+        if ((taskInitiatorNoMigrated!= null) && (!taskInitiatorNoMigrated.isEmpty())){
+            templateArgs.put("taskInitiatorNoMigrated", taskInitiatorNoMigrated);
+        }        
+        if ((taskAsigneeNoMigrated!= null) && (!taskAsigneeNoMigrated.isEmpty())){
+            templateArgs.put("taskAsigneeNoMigrated", taskAsigneeNoMigrated);
         }
 
         return templateArgs;

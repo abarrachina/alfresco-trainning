@@ -61,7 +61,17 @@ import com.users.migrateservice.dao.ActivitiProcessDAO;
 @Service
 public class MigrateServiceImpl implements MigrateService{
 
-    private static Log logger = LogFactory.getLog(MigrateServiceImpl.class);
+
+	//Static properties
+    public static final String KEY_ERROR_SITES = "Sites";
+    public static final String KEY_ERROR_GROUPS = "Groups";
+    public static final String KEY_ERROR_CONTENT = "Content";
+    public static final String KEY_ERROR_FOLDERS = "Folders";
+    public static final String KEY_ERROR_COMMENTS = "Comments";
+    public static final String KEY_ERROR_USERHOME = "UserHome";
+    public static final String KEY_ERROR_TASKINITIATOR = "TaskInitiator";
+    public static final String KEY_ERROR_TASKASIGNEE = "TaskAsignee";	
+	private static Log logger = LogFactory.getLog(MigrateServiceImpl.class);
 
     @Inject
     private PersonService personService;
@@ -93,10 +103,18 @@ public class MigrateServiceImpl implements MigrateService{
     @Inject
     private ActivitiProcessDAO activitiProcessDAO ;
 
-
     @Inject
     private PreferenceService preferenceService;
 
+    
+    final Map<String, ArrayList<NodeRef>> notMigrate = new HashMap<String, ArrayList<NodeRef>>();
+    final Map<String, ArrayList<String>> taskNoMigrated = new HashMap<String, ArrayList<String>>();
+    
+    /**
+     * Abstract property to get Local Id from task.
+     * @author antoniobarrachina
+     *
+     */
     abstract class EngineService{
         public abstract String getLocalId(final String id);
     }
@@ -110,12 +128,14 @@ public class MigrateServiceImpl implements MigrateService{
 
     };
 
-    final Map<String, ArrayList<NodeRef>> notMigrate = new HashMap<String, ArrayList<NodeRef>>();
-
     @Override
     public Map<String, ArrayList<NodeRef>> getNotMigrate() {
         return notMigrate;
     }
+    
+    public Map<String, ArrayList<String>> getTaskNoMigrated() {
+		return taskNoMigrated;
+	}
 
     @Override
     public void migrateSites(final String olduser, final String newuser) {
@@ -133,10 +153,10 @@ public class MigrateServiceImpl implements MigrateService{
             }
             catch(final UnknownAuthorityException ex){
                 sitesNotMigrate.add(site.getNodeRef());
-                logger.debug("The authority "+ authority + " not exists " + ex.getMessage());
+                logger.error("The authority "+ authority + " not exists " + ex.getMessage());
             }
         }
-        notMigrate.put("Sites", (ArrayList<NodeRef>) sitesNotMigrate);
+        notMigrate.put(KEY_ERROR_SITES, (ArrayList<NodeRef>) sitesNotMigrate);
     }
 
     @Override
@@ -152,10 +172,10 @@ public class MigrateServiceImpl implements MigrateService{
             }
             catch(final UnknownAuthorityException ex){
                 groupsNotMigrate.add(authorityService.getAuthorityNodeRef(group));
-                logger.debug("The authority "+ group + " not exists " + ex.getMessage());
+                logger.error("The authority "+ group + " not exists " + ex.getMessage());
             }
         }
-        notMigrate.put("Groups", (ArrayList<NodeRef>) groupsNotMigrate);
+        notMigrate.put(KEY_ERROR_GROUPS, (ArrayList<NodeRef>) groupsNotMigrate);
     }
 
     @Override
@@ -163,7 +183,7 @@ public class MigrateServiceImpl implements MigrateService{
         String strQuery="TYPE:\"{http://www.alfresco.org/model/content/1.0}content\"";
         strQuery += " AND ";
         strQuery += "@cm\\:creator:\"" + olduser + "\"";
-        changeCreator(strQuery, newuser, "Content");
+        changeCreator(strQuery, newuser, KEY_ERROR_CONTENT);
 
     }
 
@@ -172,7 +192,7 @@ public class MigrateServiceImpl implements MigrateService{
         String strQuery="TYPE:\"{http://www.alfresco.org/model/content/1.0}folder\"";
         strQuery += " AND ";
         strQuery += "@cm\\:creator:\"" + olduser + "\"";
-        changeCreator(strQuery, newuser, "Folders");
+        changeCreator(strQuery, newuser, KEY_ERROR_FOLDERS);
 
     }
 
@@ -181,7 +201,7 @@ public class MigrateServiceImpl implements MigrateService{
         String strQuery="TYPE:\"fm\\:post\"";
         strQuery += " AND ";
         strQuery += "@cm\\:creator:\"" + olduser + "\"";
-        changeCreator(strQuery, newuser, "Comments");
+        changeCreator(strQuery, newuser, KEY_ERROR_COMMENTS);
 
     }
 
@@ -202,22 +222,22 @@ public class MigrateServiceImpl implements MigrateService{
             if (existNode == null){
                 try{
                     final NodeRef newnode = nodeService.moveNode(node, homespaceNewUserNodeRef, ContentModel.ASSOC_CONTAINS, ContentModel.ASSOC_CHILDREN).getChildRef();
-                    changeCreatorModifier(newnode, newuser, "UserHome");
+                    changeCreatorModifier(newnode, newuser, KEY_ERROR_USERHOME);
                 }
                 catch (final NodeLockedException e)
                 {
-                    userHomeNotMigrate.add(node);
-                    notMigrate.put("UserHome", (ArrayList<NodeRef>) userHomeNotMigrate);
-                    logger.debug("The node " + node.toString() + " has locked");
+                    userHomeNotMigrate.add(node);                    
+                    logger.error("The node " + node.toString() + " has locked");
                 }
-
             }
             else{
-                userHomeNotMigrate.add(node);
-                notMigrate.put("UserHome", (ArrayList<NodeRef>) userHomeNotMigrate);
-                logger.debug("File or folder exists in the destination");
+                userHomeNotMigrate.add(node);         
+                logger.error("File or folder exists in the destination");
             }
         }
+        
+        //Adding no migrated elements
+        notMigrate.put(KEY_ERROR_USERHOME, (ArrayList<NodeRef>) userHomeNotMigrate);
     }
 
     @Override
@@ -227,14 +247,6 @@ public class MigrateServiceImpl implements MigrateService{
         preferenceService.clearPreferences(olduser);
     }
 
-    @Override
-    public void migrateLikes (final String olduser, final String newuser){
-        String strQuery="TYPE:\"cm\\:rating\"";
-        strQuery += " AND ";
-        strQuery += "@cm\\:creator:\"" + olduser + "\"";
-        changeCreator(strQuery, newuser, "Likes");
-    }
-    
     @Override
     public void migrateWorkflows(String olduser, String newuser) {
     	
@@ -256,7 +268,6 @@ public class MigrateServiceImpl implements MigrateService{
 		query.setCustomProps(filters);
 		final WorkflowService workflowService = serviceRegistry.getWorkflowService();
 		return workflowService.getWorkflows(query);
-
 	}
 
 	/***
@@ -285,8 +296,7 @@ public class MigrateServiceImpl implements MigrateService{
 		final NodeRef homespaceNodeRef = (NodeRef) nodeService.getProperty(newUserNodeRef,
 				ContentModel.PROP_HOMEFOLDER); // Might be null
 
-		final WorkflowNodeConverter workflowNodeConverter = new ActivitiNodeConverter(serviceRegistry);
-
+		final WorkflowNodeConverter workflowNodeConverter = new ActivitiNodeConverter(serviceRegistry);		
 		final NodeRef currentInitiatorNodeRef = task.getPath().getInstance().getInitiator();
 		if (nodeService.exists(currentInitiatorNodeRef)) {
 			final String currentInitiator = (String) nodeService.getProperty(currentInitiatorNodeRef,
@@ -305,16 +315,28 @@ public class MigrateServiceImpl implements MigrateService{
 		}
 	}
 
+	/***
+	 * Change workflow initiator and initiator home.
+	 * @param olduser
+	 * @param newuser
+	 * @return
+	 */
 	private MigrateServiceImpl changeWorkflowInitiator(final String olduser, final String newuser) {
 
 		// Getting noderefs for every person
-		final NodeRef oldUserNodeRef = personService.getPerson(olduser);
+		final NodeRef oldUserNodeRef = personService.getPerson(olduser);		
+		final List<WorkflowInstance> listWorkflows = getWorkflowsByInitiator(oldUserNodeRef);
+		ArrayList<String> workflowsOwnerNoMigrated = new ArrayList<>();
 		
-		final List<WorkflowInstance> listWorkflows = getWorkflowsByInitiator(oldUserNodeRef);		
-		for (final WorkflowInstance workflow : listWorkflows) {
-			List<WorkflowTask> tasks = this.getWorkflowTask(workflow);
+		for (final WorkflowInstance workflow : listWorkflows) {			
+			List<WorkflowTask> tasks = this.getWorkflowTask(workflow);			
 			for (final WorkflowTask task : tasks){
-				this.migrateUsersForWorkflow(task, olduser, newuser);
+				try{
+					this.migrateUsersForWorkflow(task, olduser, newuser);
+				}catch (Exception e) {					
+					workflowsOwnerNoMigrated.add(task.getId()+ " " +task.getName());                    
+                    logger.error("Failing setting initiator");
+				}				
 			}
 		}
 		if (true){
@@ -322,6 +344,10 @@ public class MigrateServiceImpl implements MigrateService{
 			// This value is not getted from the Initiator or Initiator_Home variable, so this step is required
 			this.forceMigrateInitiator(olduser, newuser);
 		}
+		
+		//Setting workflows error map
+		this.taskNoMigrated.put(KEY_ERROR_TASKINITIATOR, workflowsOwnerNoMigrated);
+		
 		return this;
 	}
 	
@@ -341,23 +367,30 @@ public class MigrateServiceImpl implements MigrateService{
 	 */
 	private MigrateServiceImpl changeTaskAsignee(final String olduser, final String newuser) {
 
-		// Getting noderefs for every person
-		final NodeRef oldUserNodeRef = personService.getPerson(olduser);
-		final NodeRef newUserNodeRef = personService.getPerson(newuser);
-
-		// Searching workflows
+		// Searching workflows with olduser like asignee
 		final WorkflowTaskQuery query = new WorkflowTaskQuery();
+		query.setActorId(olduser);
 		final WorkflowService workflowService = serviceRegistry.getWorkflowService();
 		final List<WorkflowTask> listTasks = workflowService.queryTasks(query, true);
+		ArrayList<String> workflowsAsigneeNoMigrated = new ArrayList<>();
+		//For every task we will set de asignee.
 		for (final WorkflowTask task : listTasks) {
 			final String assignee = (String) task.getProperties()
 					.get(QName.createQName("{http://www.alfresco.org/model/content/1.0}owner"));
-			final String taskId = engineService.getLocalId(task.getId());
+			try{
+				final String taskId = engineService.getLocalId(task.getId());
 
-			if ((assignee != null) && assignee.equalsIgnoreCase(olduser)) {
-				taskService.setAssignee(taskId, newuser);
+				if ((assignee != null) && assignee.equalsIgnoreCase(olduser)) {
+					taskService.setAssignee(taskId, newuser);
+				}
+			}catch(Exception e){
+				workflowsAsigneeNoMigrated.add(task.getId()+ " " +task.getName());                    
+                logger.error("Failing setting asignee");
 			}
 		}
+		
+		//Setting workflows error map
+		this.taskNoMigrated.put(KEY_ERROR_TASKASIGNEE, workflowsAsigneeNoMigrated);
 
 		return this;
 	}

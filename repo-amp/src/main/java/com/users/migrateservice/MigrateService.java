@@ -1,9 +1,11 @@
 package com.users.migrateservice;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.workflow.WorkflowTask;
 
 /***
  *
@@ -69,14 +71,6 @@ public interface MigrateService{
     public void migratePreferences (final String olduser, final String newuser);
 
     /***
-     * Migrate likes from olduser to newuser
-     *
-     * @param olduser
-     * @param newuser
-     */
-    public void migrateLikes (final String olduser, final String newuser);
-
-    /***
      * Migrate workflows from olduser to newuser
      */
     public void migrateWorkflows (final String olduser, final String newuser);
@@ -86,4 +80,6 @@ public interface MigrateService{
      * @return Content that the process can't migrate
      */
     public Map<String, ArrayList<NodeRef>> getNotMigrate();
+    
+    public Map<String, ArrayList<String>> getTaskNoMigrated();
 }
