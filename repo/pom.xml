@@ -19,8 +19,8 @@
     <description>Alfresco Repository aggregator, installs your repository AMPs in the Alfresco WAR for aggregation and easy deployment purposes</description>
 
     <parent>
-        <groupId>com.acme</groupId>
-        <artifactId>trainning</artifactId>
+        <groupId>com.ixxus.ipm</groupId>
+        <artifactId>migration.users</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
