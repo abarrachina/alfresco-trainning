@@ -104,13 +104,13 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
 
         final String newuser = paramNewUser.toString();
         final String olduser = paramOldUser.toString();
-        final Boolean sites = (Boolean) paramSites;
-        final Boolean groups = (Boolean) paramGroups;
-        final Boolean content = (Boolean) paramContent;
-        final Boolean comments = (Boolean) paramComment;
-        final Boolean userhome = (Boolean) paramUserHome;
-        final Boolean favorites = (Boolean) paramFavorites;
-        final Boolean workflows = (Boolean) paramWorkflows;
+        final Boolean sites = Boolean.valueOf(paramSites.toString());
+        final Boolean groups = Boolean.valueOf(paramGroups.toString());
+        final Boolean content = Boolean.valueOf(paramContent.toString());
+        final Boolean comments = Boolean.valueOf(paramComment.toString());
+        final Boolean userhome = Boolean.valueOf(paramUserHome.toString());
+        final Boolean favorites = Boolean.valueOf(paramFavorites.toString());
+        final Boolean workflows = Boolean.valueOf(paramWorkflows.toString());
 
         if ((workflows != null) && workflows){
             migrateServiceImpl.migrateWorkflows(olduser, newuser);
@@ -189,19 +189,19 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
         if ((sitesNotMigrate != null) && (!sitesNotMigrate.isEmpty())){
             templateArgs.put("sitesNotMigrate", sitesNotMigrate);
         }
-        if ((groupsNotMigrate!= null) && (!sitesNotMigrate.isEmpty())){
+        if ((groupsNotMigrate!= null) && (!groupsNotMigrate.isEmpty())){
             templateArgs.put("groupsNotMigrate", groupsNotMigrate);
         }
-        if (((contentNotMigrate) != null) && (!sitesNotMigrate.isEmpty())){
+        if (((contentNotMigrate) != null) && (!contentNotMigrate.isEmpty())){
             templateArgs.put("contentNotMigrate", contentNotMigrate);
         }
-        if ((foldersNotMigrate!= null) && (!sitesNotMigrate.isEmpty())){
+        if ((foldersNotMigrate!= null) && (!foldersNotMigrate.isEmpty())){
             templateArgs.put("foldersNotMigrate", foldersNotMigrate);
         }
-        if ((commentsNotMigrate!= null) && (!sitesNotMigrate.isEmpty())){
+        if ((commentsNotMigrate!= null) && (!commentsNotMigrate.isEmpty())){
             templateArgs.put("commentsNotMigrate", commentsNotMigrate);
         }
-        if ((userHomeNotMigrate!= null) && (!sitesNotMigrate.isEmpty())){
+        if ((userHomeNotMigrate!= null) && (!userHomeNotMigrate.isEmpty())){
             templateArgs.put("userHomeNotMigrate", userHomeNotMigrate);
         }
         if ((taskInitiatorNoMigrated!= null) && (!taskInitiatorNoMigrated.isEmpty())){
