@@ -19,7 +19,6 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.PersonService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +36,7 @@ import com.ixxus.ipm.migration.users.MigrateServiceImpl;
 public class MigrateActionExecuter extends ActionExecuterAbstractBase
 {
     private static Log logger = LogFactory.getLog(MigrateActionExecuter.class);
-    public static final String NAME = "migrate-action";
+    public static final String NAME_MIGRATE = "migrate-action";
     public static final String PARAM_NEW_USER = "newuser";
     public static final String PARAM_OLD_USER = "olduser";
     public static final String PARAM_SITES = "sites";
@@ -58,9 +57,6 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
 
     public void setMigrateService(final MigrateService migrateServiceImpl) {
         this.migrateServiceImpl = migrateServiceImpl;
-    }
-
-    public void setPersonService(final PersonService  personService) {
     }
 
     private ServiceRegistry serviceRegistry;
@@ -112,26 +108,26 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
         final Boolean favorites = Boolean.valueOf(paramFavorites.toString());
         final Boolean workflows = Boolean.valueOf(paramWorkflows.toString());
 
-        if ((workflows != null) && workflows){
+        if (workflows){
             migrateServiceImpl.migrateWorkflows(olduser, newuser);
         }
-        if ((sites != null) && sites){
+        if (sites){
             migrateServiceImpl.migrateSites(olduser, newuser);
         }
-        if ((groups != null) && groups){
+        if (groups){
             migrateServiceImpl.migrateGroups(olduser, newuser);
         }
-        if ((content != null) && content){
+        if (content){
             migrateServiceImpl.migrateContent(olduser, newuser);
             migrateServiceImpl.migrateFolder(olduser, newuser);
         }
-        if ((comments != null) && comments){
+        if (comments){
             migrateServiceImpl.migrateComments(olduser, newuser);
         }
-        if ((userhome != null) && userhome){
+        if (userhome){
             migrateServiceImpl.migrateUserHome(olduser, newuser);
         }
-        if ((favorites != null) && favorites){
+        if (favorites){
             migrateServiceImpl.migratePreferences(olduser, newuser);
         }
 
@@ -148,7 +144,7 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
 
         final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
         ResultSet rs;
-        NodeRef template = null;
+        NodeRef template;
 
         rs = searchService.query(storeRef, SearchService.LANGUAGE_LUCENE, pathTemplate);
 
@@ -173,7 +169,7 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
      * @return email template
      */
     private Map<String, Serializable> prepareTemplate(){
-        final Map<String, Serializable> templateArgs = new HashMap<String, Serializable>();
+        final Map<String, Serializable> templateArgs = new HashMap<>();
         final Map<String, ArrayList<NodeRef>> notMigrate = migrateServiceImpl.getNotMigrate();
         final Map<String, ArrayList<String>> taskNoMigrated = migrateServiceImpl.getTaskNoMigrated();
         final ArrayList<NodeRef> sitesNotMigrate = notMigrate.get(MigrateServiceImpl.KEY_ERROR_SITES);

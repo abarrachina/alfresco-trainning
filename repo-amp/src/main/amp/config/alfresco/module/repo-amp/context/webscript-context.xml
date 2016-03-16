@@ -14,7 +14,6 @@
 		parent="action-executer">
 		<property name="serviceRegistry" ref="ServiceRegistry" />
 		<property name="migrateService" ref="migrateServiceImpl" />
-		<property name="personService" ref="PersonService" />
 		<property name="searchService" ref="SearchService" />
 	</bean>
 

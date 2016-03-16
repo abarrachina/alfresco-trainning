@@ -53,7 +53,7 @@ public class MigrateUser extends DeclarativeWebScript {
 
     @Override
     protected Map<String, Object> executeImpl(final WebScriptRequest req, final Status status, final Cache cache) {
-        final Map<String, Object> model = new HashMap<String, Object>();
+        final Map<String, Object> model = new HashMap<>();
         model.put("code", 0);
 
         final String newuser = req.getParameter("newuser");
@@ -73,7 +73,7 @@ public class MigrateUser extends DeclarativeWebScript {
         if (personService.personExists(newuser)) {
 
             final ActionService actionService = serviceRegistry.getActionService();
-            final Action migrateAction = actionService.createAction(MigrateActionExecuter.NAME);
+            final Action migrateAction = actionService.createAction(MigrateActionExecuter.NAME_MIGRATE);
 
             migrateAction.setParameterValue(MigrateActionExecuter.PARAM_NEW_USER, newuser);
             migrateAction.setParameterValue(MigrateActionExecuter.PARAM_OLD_USER, olduser);

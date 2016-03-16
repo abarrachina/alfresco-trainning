@@ -6,22 +6,22 @@ import com.ixxus.ipm.migration.users.ProcessStarterUser;
 
 public class ActivitiProcessDAOImpl implements ActivitiProcessDAO {
 
-	protected SqlSessionTemplate template;
-	
-	public ActivitiProcessDAOImpl() {
-		
-	}
-	
-	public ActivitiProcessDAOImpl(SqlSessionTemplate template) {
-		this.template = template;
-	}
-	
-	public final void setTemplate(SqlSessionTemplate sqlSessionTemplate){
-		this.template = sqlSessionTemplate;
-	}
-	
-	public int executeUpdateAuthor (ProcessStarterUser input){
-		return this.template.update("workflow-initiator.update_starter_user", input);
-	}
+    protected SqlSessionTemplate template;
+
+    public ActivitiProcessDAOImpl() {
+
+    }
+
+    public ActivitiProcessDAOImpl(final SqlSessionTemplate template) {
+        this.template = template;
+    }
+
+    public final void setTemplate(final SqlSessionTemplate sqlSessionTemplate){
+        this.template = sqlSessionTemplate;
+    }
+
+    @Override
+    public int executeUpdateAuthor (final ProcessStarterUser input){
+        return this.template.update("workflow-initiator.update_starter_user", input);
+    }
 }
- 

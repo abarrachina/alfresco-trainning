@@ -142,7 +142,7 @@ public class MigrateServiceImpl implements MigrateService{
             }
             catch(final UnknownAuthorityException ex){
                 sitesNotMigrate.add(site.getNodeRef());
-                logger.error("The authority "+ authority + " not exists " + ex.getMessage());
+                logger.error("The authority "+ authority + " not exists " + ex.getMessage(),ex);
 
             }
         }
@@ -162,7 +162,7 @@ public class MigrateServiceImpl implements MigrateService{
             }
             catch(final UnknownAuthorityException ex){
                 groupsNotMigrate.add(authorityService.getAuthorityNodeRef(group));
-                logger.error("The authority "+ group + " not exists " + ex.getMessage());
+                logger.error("The authority "+ group + " not exists " + ex.getMessage(), ex);
             }
         }
         notMigrate.put(KEY_ERROR_GROUPS, (ArrayList<NodeRef>) groupsNotMigrate);
@@ -217,7 +217,7 @@ public class MigrateServiceImpl implements MigrateService{
                 catch (final NodeLockedException e)
                 {
                     userHomeNotMigrate.add(node);
-                    logger.error("The node " + node.toString() + " has locked");
+                    logger.error("The node " + node.toString() + " has locked", e);
                 }
             }
             else{
@@ -325,15 +325,13 @@ public class MigrateServiceImpl implements MigrateService{
                     this.migrateUsersForWorkflow(task, olduser, newuser);
                 }catch (final Exception e) {
                     workflowsOwnerNoMigrated.add(task.getId()+ " " +task.getName());
-                    logger.error("Failing setting initiator");
+                    logger.error("Failing setting initiator", e);
                 }
             }
         }
-        if (true){
-            //Require method to migrate the task that "I've started"
-            // This value is not getted from the Initiator or Initiator_Home variable, so this step is required
-            this.forceMigrateInitiator(olduser, newuser);
-        }
+        //Require method to migrate the task that "I've started"
+        // This value is not getted from the Initiator or Initiator_Home variable, so this step is required
+        this.forceMigrateInitiator(olduser, newuser);
 
         //Setting workflows error map
         this.taskNoMigrated.put(KEY_ERROR_TASKINITIATOR, workflowsOwnerNoMigrated);
@@ -375,7 +373,7 @@ public class MigrateServiceImpl implements MigrateService{
                 }
             }catch(final Exception e){
                 workflowsAsigneeNoMigrated.add(task.getId()+ " " +task.getName());
-                logger.error("Failing setting asignee");
+                logger.error("Failing setting asignee", e);
             }
         }
 
@@ -446,7 +444,7 @@ public class MigrateServiceImpl implements MigrateService{
         }
         catch(final InvalidNodeRefException ex){
             contentNotMigrate.add(node);
-            logger.debug("The noderef "+ node.toString() + " can't migrate " + ex.getMessage());
+            logger.debug("The noderef "+ node.toString() + " can't migrate " + ex.getMessage(), ex);
         }
         finally
         {
