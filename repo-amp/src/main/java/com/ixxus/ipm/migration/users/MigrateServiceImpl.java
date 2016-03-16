@@ -101,26 +101,20 @@ public class MigrateServiceImpl implements MigrateService{
     private PreferenceService preferenceService;
 
 
-    final Map<String, ArrayList<NodeRef>> notMigrate = new HashMap<String, ArrayList<NodeRef>>();
-    final Map<String, ArrayList<String>> taskNoMigrated = new HashMap<String, ArrayList<String>>();
+    final Map<String, ArrayList<NodeRef>> notMigrate = new HashMap<>();
+    final Map<String, ArrayList<String>> taskNoMigrated = new HashMap<>();
 
     /**
      * Abstract property to get Local Id from task.
      * @author antoniobarrachina
      *
      */
-    abstract class EngineService{
-        public abstract String getLocalId(final String id);
+    @FunctionalInterface
+    public interface EngineService{
+        public String getLocalId(final String id);
     }
 
-    EngineService engineService = new EngineService(){
-
-        @Override
-        public String getLocalId (final String id){
-            return BPMEngineRegistry.getLocalId(id);
-        }
-
-    };
+    EngineService engineService = BPMEngineRegistry::getLocalId;
 
     @Override
     public Map<String, ArrayList<NodeRef>> getNotMigrate() {
@@ -136,7 +130,7 @@ public class MigrateServiceImpl implements MigrateService{
     public void migrateSites(final String olduser, final String newuser) {
         String authority = "";
         final List<SiteInfo> sites = siteService.listSites(olduser);
-        final List<NodeRef> sitesNotMigrate =  new ArrayList<NodeRef>();
+        final List<NodeRef> sitesNotMigrate =  new ArrayList<>();
 
         for (final SiteInfo site: sites){
             try{
@@ -149,6 +143,7 @@ public class MigrateServiceImpl implements MigrateService{
             catch(final UnknownAuthorityException ex){
                 sitesNotMigrate.add(site.getNodeRef());
                 logger.error("The authority "+ authority + " not exists " + ex.getMessage());
+
             }
         }
         notMigrate.put(KEY_ERROR_SITES, (ArrayList<NodeRef>) sitesNotMigrate);
@@ -157,7 +152,7 @@ public class MigrateServiceImpl implements MigrateService{
     @Override
     public void migrateGroups(final String olduser, final String newuser) {
         final Set<String> groups = authorityService.getAuthoritiesForUser(olduser);
-        final List<NodeRef> groupsNotMigrate  = new ArrayList<NodeRef>();
+        final List<NodeRef> groupsNotMigrate  = new ArrayList<>();
 
         for (final String group:groups){
             try{
@@ -207,7 +202,7 @@ public class MigrateServiceImpl implements MigrateService{
         final NodeRef homespaceOldUserNodeRef = (NodeRef) nodeService.getProperty(oldUserNodeRef, ContentModel.PROP_HOMEFOLDER);
         final NodeRef homespaceNewUserNodeRef = (NodeRef) nodeService.getProperty(newUserNodeRef, ContentModel.PROP_HOMEFOLDER);
         final List<ChildAssociationRef> childs = nodeService.getChildAssocs(homespaceOldUserNodeRef);
-        final List<NodeRef> userHomeNotMigrate = new ArrayList<NodeRef>();
+        final List<NodeRef> userHomeNotMigrate = new ArrayList<>();
 
         for (final ChildAssociationRef child:childs){
             final NodeRef node = child.getChildRef();
@@ -258,7 +253,7 @@ public class MigrateServiceImpl implements MigrateService{
 
         // Searching workflows
         final WorkflowInstanceQuery query = new WorkflowInstanceQuery();
-        final Map<QName, Object> filters = new HashMap<QName, Object>();
+        final Map<QName, Object> filters = new HashMap<>();
         filters.put(QName.createQName(NamespaceService.DEFAULT_URI, "initiator"), oldUserNodeRef);
         query.setCustomProps(filters);
         final WorkflowService workflowService = serviceRegistry.getWorkflowService();
@@ -429,7 +424,7 @@ public class MigrateServiceImpl implements MigrateService{
         }
 
         if (contentNotMigrate == null){
-            contentNotMigrate = new ArrayList<NodeRef>();
+            contentNotMigrate = new ArrayList<>();
         }
 
         if (nodeService.getType(node).equals(ContentModel.TYPE_FOLDER)){
