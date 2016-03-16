@@ -3,9 +3,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ixxus.ipm</groupId>
     <version>1.0-SNAPSHOT</version>
-    <name>Alfresco Repository and Share Quickstart with database and an embedded Tomcat runner.</name>
-    <description>This All-in-One project allows to manage all the components involved in Alfresco development (Repo, Share, Solr4, AMPs) in one project
-    </description>
+    <name>Alfresco Migration User Tool.</name>
+    <description>This project allows to migrate an user in another </description>
     <packaging>pom</packaging>
 
     <parent>
