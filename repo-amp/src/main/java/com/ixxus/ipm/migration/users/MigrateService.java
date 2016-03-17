@@ -27,6 +27,6 @@ public interface MigrateService{
      *
      * @return Content that the process can't migrate
      */
-    public <T> Map<String, List<T>> getNotMigrate();
+    public <T> List<T> getNotMigrate();
 
 }
