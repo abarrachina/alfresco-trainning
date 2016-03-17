@@ -17,11 +17,9 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class MigrateServiceUserHome extends MigrateServiceContent {
+public class MigrateServiceUserHome extends AbstractMigrateService {
 
 	public static final String KEY_ERROR_USERHOME = "UserHome";
-	
-	private Map<String, List<NodeRef>> notMigrated = new HashMap<>();
 	
 	@Inject
     private PersonService personService;
@@ -38,7 +36,7 @@ public class MigrateServiceUserHome extends MigrateServiceContent {
         final NodeRef homespaceOldUserNodeRef = (NodeRef) nodeService.getProperty(oldUserNodeRef, ContentModel.PROP_HOMEFOLDER);
         final NodeRef homespaceNewUserNodeRef = (NodeRef) nodeService.getProperty(newUserNodeRef, ContentModel.PROP_HOMEFOLDER);
         final List<ChildAssociationRef> childs = nodeService.getChildAssocs(homespaceOldUserNodeRef);
-        final List<NodeRef> userHomeNotMigrate = new ArrayList<>();
+        
 
         for (final ChildAssociationRef child:childs){
             final NodeRef node = child.getChildRef();
@@ -52,26 +50,15 @@ public class MigrateServiceUserHome extends MigrateServiceContent {
                 }
                 catch (final NodeLockedException e)
                 {
-                    userHomeNotMigrate.add(node);
+                	this.addNodeNotMigrate(node);
                     logger.error("The node " + node.toString() + " has locked", e);
                 }
             }
             else{
-                userHomeNotMigrate.add(node);
+                this.addNodeNotMigrate(node);
                 logger.error("File or folder exists in the destination");
             }
-        }
-
-        //Adding no migrated elements
-        notMigrated.put(KEY_ERROR_USERHOME, (ArrayList<NodeRef>) userHomeNotMigrate);
-
-	}
-
-	
-    @Override
-    public Map<String, ArrayList<NodeRef>> getNotMigrate() {
-        return notMigrate;
-    }
-   
+        }        
+	}   
 	
 }
