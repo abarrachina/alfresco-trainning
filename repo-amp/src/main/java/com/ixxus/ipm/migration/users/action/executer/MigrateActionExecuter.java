@@ -164,8 +164,7 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
         final ArrayList<T> foldersNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_FOLDERS);
         final ArrayList<T> commentsNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_COMMENTS);
         final ArrayList<T> userHomeNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_USERHOME);
-        final ArrayList<T> taskInitiatorNoMigrated = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_TASKINITIATOR);
-        final ArrayList<T> taskAsigneeNoMigrated = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_TASKASIGNEE);
+        final ArrayList<T> workflowsNoMigrated = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_WORKFLOW);
 
 
         if (!MigrateActionUtils.isNullOrEmpty(sitesNotMigrate)){
@@ -186,13 +185,9 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
         if  (!MigrateActionUtils.isNullOrEmpty(userHomeNotMigrate)){
             templateArgs.put("userHomeNotMigrate", userHomeNotMigrate);
         }
-        if  (!MigrateActionUtils.isNullOrEmpty(taskInitiatorNoMigrated)){
-            templateArgs.put("taskInitiatorNoMigrated", taskInitiatorNoMigrated);
+        if  (!MigrateActionUtils.isNullOrEmpty(workflowsNoMigrated)){
+            templateArgs.put("workflowsNoMigrated", workflowsNoMigrated);
         }
-        if  (!MigrateActionUtils.isNullOrEmpty(taskAsigneeNoMigrated)){
-            templateArgs.put("taskAsigneeNoMigrated", taskAsigneeNoMigrated);
-        }
-
         return templateArgs;
     }
 

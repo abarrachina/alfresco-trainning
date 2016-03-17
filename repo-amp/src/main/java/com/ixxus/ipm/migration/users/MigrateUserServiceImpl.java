@@ -58,13 +58,13 @@ public class MigrateUserServiceImpl<T> implements MigrateUserService{
 
 
     //Static properties
-    public static final String KEY_ERROR_SITES = "Sites";
-    public static final String KEY_ERROR_GROUPS = "Groups";
-    public static final String KEY_ERROR_CONTENT = "Content";
-    public static final String KEY_ERROR_FOLDERS = "Folders";
-    public static final String KEY_ERROR_COMMENTS = "Comments";
-    public static final String KEY_ERROR_USERHOME = "UserHome";
-    public static final String KEY_ERROR_WORKFLOW = "Workflow";
+    public static final String KEY_ERROR_SITES = MigrateServiceFactory.SITES;
+    public static final String KEY_ERROR_GROUPS = MigrateServiceFactory.GROUPS;
+    public static final String KEY_ERROR_CONTENT = MigrateServiceFactory.CONTENT;
+    public static final String KEY_ERROR_FOLDERS = MigrateServiceFactory.CONTENT;
+    public static final String KEY_ERROR_COMMENTS = MigrateServiceFactory.COMMENTS;
+    public static final String KEY_ERROR_USERHOME = MigrateServiceFactory.USERHOME;
+    public static final String KEY_ERROR_WORKFLOW = MigrateServiceFactory.WORKFLOWS;
 	
 	private Map<String, List<T>> notMigrated = new HashMap<>(); 
 
