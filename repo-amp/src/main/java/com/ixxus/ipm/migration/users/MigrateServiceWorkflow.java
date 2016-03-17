@@ -31,9 +31,6 @@ import com.ixxus.ipm.migration.users.dao.ActivitiProcessDAO;
 
 public class MigrateServiceWorkflow implements MigrateService {
 
-    public static final String KEY_ERROR_TASKINITIATOR = "TaskInitiator";
-    public static final String KEY_ERROR_TASKASIGNEE = "TaskAsignee";
-	
 	@Inject
 	private ServiceRegistry serviceRegistry;
 	
@@ -49,7 +46,7 @@ public class MigrateServiceWorkflow implements MigrateService {
     @Inject
     private ActivitiProcessDAO activitiProcessDAO ;
     
-    private Map<String, List<String>> notMigrated = new HashMap<>();
+    private List<String> notMigrated = new ArrayList<>();
     
     private static Log logger = LogFactory.getLog(MigrateUserServiceImpl.class);    
     
@@ -63,16 +60,15 @@ public class MigrateServiceWorkflow implements MigrateService {
 
 		
 	@Override
-	public Map<String, List<String>> getNotMigrate() {
-		// TODO Auto-generated method stub
+	public List<String> getNotMigrate() {
+
 		return notMigrated;
 	}
 
 
 	@Override
 	public void migrate(String olduser, String newuser) {
-		this.changeTaskAsignee(olduser, newuser).changeWorkflowInitiator(olduser, newuser);
-		
+		this.changeTaskAsignee(olduser, newuser).changeWorkflowInitiator(olduser, newuser);		
 	}
 	
 	/***
@@ -147,15 +143,14 @@ public class MigrateServiceWorkflow implements MigrateService {
         // Getting noderefs for every person
         final NodeRef oldUserNodeRef = personService.getPerson(olduser);
         final List<WorkflowInstance> listWorkflows = getWorkflowsByInitiator(oldUserNodeRef);
-        final ArrayList<String> workflowsOwnerNoMigrated = new ArrayList<>();
-
+        
         for (final WorkflowInstance workflow : listWorkflows) {
             final List<WorkflowTask> tasks = this.getWorkflowTask(workflow);
             for (final WorkflowTask task : tasks){
                 try{
                     this.migrateUsersForWorkflow(task, olduser, newuser);
                 }catch (final Exception e) {
-                    workflowsOwnerNoMigrated.add(task.getId()+ " " +task.getName());
+                    this.notMigrated.add(task.getId()+ " " +task.getName());
                     logger.error("Failing setting initiator", e);
                 }
             }
@@ -163,9 +158,6 @@ public class MigrateServiceWorkflow implements MigrateService {
         //Require method to migrate the task that "I've started"
         // This value is not getted from the Initiator or Initiator_Home variable, so this step is required
         this.forceMigrateInitiator(olduser, newuser);
-
-        //Setting workflows error map
-        this.notMigrated.put(KEY_ERROR_TASKINITIATOR, workflowsOwnerNoMigrated);
 
         return this;
     }
@@ -191,7 +183,6 @@ public class MigrateServiceWorkflow implements MigrateService {
         query.setActorId(olduser);
         final WorkflowService workflowService = serviceRegistry.getWorkflowService();
         final List<WorkflowTask> listTasks = workflowService.queryTasks(query, true);
-        final ArrayList<String> workflowsAsigneeNoMigrated = new ArrayList<>();
         //For every task we will set de asignee.
         for (final WorkflowTask task : listTasks) {
             final String assignee = (String) task.getProperties()
@@ -203,13 +194,10 @@ public class MigrateServiceWorkflow implements MigrateService {
                     taskService.setAssignee(taskId, newuser);
                 }
             }catch(final Exception e){
-                workflowsAsigneeNoMigrated.add(task.getId()+ " " +task.getName());
+            	this.notMigrated.add(task.getId()+ " " +task.getName());
                 logger.error("Failing setting asignee", e);
             }
         }
-
-        //Setting workflows error map
-        this.notMigrated.put(KEY_ERROR_TASKASIGNEE, workflowsAsigneeNoMigrated);
 
         return this;
     }
