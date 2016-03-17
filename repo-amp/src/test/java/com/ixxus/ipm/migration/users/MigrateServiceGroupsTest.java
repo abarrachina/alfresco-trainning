@@ -21,7 +21,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.ixxus.ipm.migration.users.MigrateService;
 import com.tradeshift.test.remote.Remote;
 import com.tradeshift.test.remote.RemoteTestRunner;
 
@@ -36,14 +35,14 @@ public class MigrateServiceGroupsTest {
 
     @Inject
     @InjectMocks
-    private MigrateService migrateService;
+    private MigrateUserService migrateUserService;
 
     @Mock
     private AuthorityService authorityService;
 
     @Test
     public void testWiring() {
-        assertNotNull(migrateService);
+        assertNotNull(migrateUserService);
     }
 
     @Before
@@ -63,7 +62,7 @@ public class MigrateServiceGroupsTest {
 
     @Test
     public void testMigrateGroups() {
-        migrateService.migrateGroups(olduser, newuser);
+        migrateUserService.migrateGroups(olduser, newuser);
         verify(authorityService, times(1)).addAuthority("Group1", newuser);
         verify(authorityService, times(1)).addAuthority("Group2", newuser);
     }

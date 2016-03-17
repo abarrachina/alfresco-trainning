@@ -23,8 +23,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.ixxus.ipm.migration.users.MigrateService;
-import com.ixxus.ipm.migration.users.MigrateServiceImpl;
+import com.ixxus.ipm.migration.users.MigrateUserService;
+import com.ixxus.ipm.migration.users.MigrateUserServiceImpl;
+import com.ixxus.ipm.migration.users.utils.MigrateActionUtils;
 
 /***
  *
@@ -53,19 +54,17 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
     @Value("${path.email.template}")
     private String pathTemplate;
 
-    private MigrateService migrateServiceImpl;
-
-    public void setMigrateService(final MigrateService migrateServiceImpl) {
-        this.migrateServiceImpl = migrateServiceImpl;
-    }
-
+    private MigrateUserService migrateUserServiceImpl;
     private ServiceRegistry serviceRegistry;
+    private SearchService searchService;
+
+    public void setMigrateUserService(final MigrateUserService migrateUserServiceImpl) {
+        this.migrateUserServiceImpl = migrateUserServiceImpl;
+    }
 
     public void setServiceRegistry(final ServiceRegistry serviceRegistry) {
         this.serviceRegistry = serviceRegistry;
     }
-
-    private SearchService searchService;
 
     public void setSearchService(final SearchService searchService) {
         this.searchService = searchService;
@@ -109,26 +108,26 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
         final Boolean workflows = Boolean.valueOf(paramWorkflows.toString());
 
         if (workflows){
-            migrateServiceImpl.migrateWorkflows(olduser, newuser);
+            migrateUserServiceImpl.migrateWorkflows(olduser, newuser);
         }
         if (sites){
-            migrateServiceImpl.migrateSites(olduser, newuser);
+            migrateUserServiceImpl.migrateSites(olduser, newuser);
         }
         if (groups){
-            migrateServiceImpl.migrateGroups(olduser, newuser);
+            migrateUserServiceImpl.migrateGroups(olduser, newuser);
         }
         if (content){
-            migrateServiceImpl.migrateContent(olduser, newuser);
-            migrateServiceImpl.migrateFolder(olduser, newuser);
+            migrateUserServiceImpl.migrateContent(olduser, newuser);
+            migrateUserServiceImpl.migrateFolder(olduser, newuser);
         }
         if (comments){
-            migrateServiceImpl.migrateComments(olduser, newuser);
+            migrateUserServiceImpl.migrateComments(olduser, newuser);
         }
         if (userhome){
-            migrateServiceImpl.migrateUserHome(olduser, newuser);
+            migrateUserServiceImpl.migrateUserHome(olduser, newuser);
         }
         if (favorites){
-            migrateServiceImpl.migratePreferences(olduser, newuser);
+            migrateUserServiceImpl.migratePreferences(olduser, newuser);
         }
 
         sendEmail();
@@ -169,41 +168,42 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
      * @return email template
      */
     private Map<String, Serializable> prepareTemplate(){
+
         final Map<String, Serializable> templateArgs = new HashMap<>();
-        final Map<String, ArrayList<NodeRef>> notMigrate = migrateServiceImpl.getNotMigrate();
-        final Map<String, ArrayList<String>> taskNoMigrated = migrateServiceImpl.getTaskNoMigrated();
-        final ArrayList<NodeRef> sitesNotMigrate = notMigrate.get(MigrateServiceImpl.KEY_ERROR_SITES);
-        final ArrayList<NodeRef> groupsNotMigrate = notMigrate.get(MigrateServiceImpl.KEY_ERROR_GROUPS);
-        final ArrayList<NodeRef> contentNotMigrate = notMigrate.get(MigrateServiceImpl.KEY_ERROR_CONTENT);
-        final ArrayList<NodeRef> foldersNotMigrate = notMigrate.get(MigrateServiceImpl.KEY_ERROR_FOLDERS);
-        final ArrayList<NodeRef> commentsNotMigrate = notMigrate.get(MigrateServiceImpl.KEY_ERROR_COMMENTS);
-        final ArrayList<NodeRef> userHomeNotMigrate = notMigrate.get(MigrateServiceImpl.KEY_ERROR_USERHOME);
-        final ArrayList<String> taskInitiatorNoMigrated = taskNoMigrated.get(MigrateServiceImpl.KEY_ERROR_TASKINITIATOR);
-        final ArrayList<NodeRef> taskAsigneeNoMigrated = notMigrate.get(MigrateServiceImpl.KEY_ERROR_TASKASIGNEE);
+        final Map<String, ArrayList<NodeRef>> notMigrate = migrateUserServiceImpl.getNotMigrate();
+        final Map<String, ArrayList<String>> taskNoMigrated = migrateUserServiceImpl.getTaskNoMigrated();
+        final ArrayList<NodeRef> sitesNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_SITES);
+        final ArrayList<NodeRef> groupsNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_GROUPS);
+        final ArrayList<NodeRef> contentNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_CONTENT);
+        final ArrayList<NodeRef> foldersNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_FOLDERS);
+        final ArrayList<NodeRef> commentsNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_COMMENTS);
+        final ArrayList<NodeRef> userHomeNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_USERHOME);
+        final ArrayList<String> taskInitiatorNoMigrated = taskNoMigrated.get(MigrateUserServiceImpl.KEY_ERROR_TASKINITIATOR);
+        final ArrayList<NodeRef> taskAsigneeNoMigrated = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_TASKASIGNEE);
 
 
-        if ((sitesNotMigrate != null) && (!sitesNotMigrate.isEmpty())){
+        if (!MigrateActionUtils.isNullOrEmpty(sitesNotMigrate)){
             templateArgs.put("sitesNotMigrate", sitesNotMigrate);
         }
-        if ((groupsNotMigrate!= null) && (!groupsNotMigrate.isEmpty())){
+        if (!MigrateActionUtils.isNullOrEmpty(groupsNotMigrate)){
             templateArgs.put("groupsNotMigrate", groupsNotMigrate);
         }
-        if (((contentNotMigrate) != null) && (!contentNotMigrate.isEmpty())){
+        if (!MigrateActionUtils.isNullOrEmpty(contentNotMigrate)){
             templateArgs.put("contentNotMigrate", contentNotMigrate);
         }
-        if ((foldersNotMigrate!= null) && (!foldersNotMigrate.isEmpty())){
+        if  (!MigrateActionUtils.isNullOrEmpty(foldersNotMigrate)){
             templateArgs.put("foldersNotMigrate", foldersNotMigrate);
         }
-        if ((commentsNotMigrate!= null) && (!commentsNotMigrate.isEmpty())){
+        if  (!MigrateActionUtils.isNullOrEmpty(commentsNotMigrate)){
             templateArgs.put("commentsNotMigrate", commentsNotMigrate);
         }
-        if ((userHomeNotMigrate!= null) && (!userHomeNotMigrate.isEmpty())){
+        if  (!MigrateActionUtils.isNullOrEmpty(userHomeNotMigrate)){
             templateArgs.put("userHomeNotMigrate", userHomeNotMigrate);
         }
-        if ((taskInitiatorNoMigrated!= null) && (!taskInitiatorNoMigrated.isEmpty())){
+        if  (!MigrateActionUtils.isNullOrEmpty(taskInitiatorNoMigrated)){
             templateArgs.put("taskInitiatorNoMigrated", taskInitiatorNoMigrated);
         }
-        if ((taskAsigneeNoMigrated!= null) && (!taskAsigneeNoMigrated.isEmpty())){
+        if  (!MigrateActionUtils.isNullOrEmpty(taskAsigneeNoMigrated)){
             templateArgs.put("taskAsigneeNoMigrated", taskAsigneeNoMigrated);
         }
 

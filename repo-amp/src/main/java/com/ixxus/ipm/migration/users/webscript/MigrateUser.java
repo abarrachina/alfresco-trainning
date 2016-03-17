@@ -40,12 +40,11 @@ import com.ixxus.ipm.migration.users.action.executer.MigrateActionExecuter;
 public class MigrateUser extends DeclarativeWebScript {
 
     private ServiceRegistry serviceRegistry;
+    private PersonService personService;
 
     public void setServiceRegistry(final ServiceRegistry serviceRegistry) {
         this.serviceRegistry = serviceRegistry;
     }
-
-    private PersonService personService;
 
     public void setPersonService(final PersonService  personService) {
         this. personService =  personService;
@@ -85,14 +84,8 @@ public class MigrateUser extends DeclarativeWebScript {
             migrateAction.setParameterValue(MigrateActionExecuter.PARAM_FAVORITES, favorites);
             migrateAction.setParameterValue(MigrateActionExecuter.PARAM_WORKFLOWS, workflows);
 
-            AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<Void>()
-            {
-                @Override
-                public Void doWork() throws Exception
-                {
-                    actionService.executeAction(migrateAction, null, true, true);
-                    return null;
-                }
+            AuthenticationUtil.runAs(() -> {
+                actionService.executeAction(migrateAction, null, true, true); return null;
             }, AuthenticationUtil.getSystemUserName());
 
         }

@@ -30,7 +30,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.ixxus.ipm.migration.users.MigrateService;
 import com.tradeshift.test.remote.Remote;
 import com.tradeshift.test.remote.RemoteTestRunner;
 
@@ -46,7 +45,7 @@ public class MigrateServiceContentTest {
 
     @Inject
     @InjectMocks
-    private MigrateService migrateService;
+    private MigrateUserService migrateUserService;
 
     @Mock
     private SearchService searchService;
@@ -94,7 +93,7 @@ public class MigrateServiceContentTest {
         when(nodeService.getType(any(NodeRef.class))).thenReturn(ContentModel.TYPE_CONTENT);
         when(rs.getNodeRefs()).thenReturn(listNodeRefs);
 
-        migrateService.migrateContent(olduser, newuser);
+        migrateUserService.migrateContent(olduser, newuser);
         verify(nodeService, times(1)).setProperty(content1, ContentModel.PROP_CREATOR, newuser);
         verify(nodeService, times(1)).setProperty(content2, ContentModel.PROP_CREATOR, newuser);
         verify(ownableService, times(1)).setOwner(content1, newuser);
@@ -116,7 +115,7 @@ public class MigrateServiceContentTest {
         when(nodeService.getType(any(NodeRef.class))).thenReturn(ContentModel.TYPE_FOLDER);
         when(rs.getNodeRefs()).thenReturn(listNodeRefs);
 
-        migrateService.migrateContent(olduser, newuser);
+        migrateUserService.migrateContent(olduser, newuser);
         verify(nodeService, times(1)).setProperty(content1, ContentModel.PROP_CREATOR, newuser);
         verify(nodeService, times(1)).setProperty(content2, ContentModel.PROP_CREATOR, newuser);
         verify(ownableService, times(1)).setOwner(content1, newuser);

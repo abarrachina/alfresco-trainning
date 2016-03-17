@@ -2,10 +2,10 @@ package com.ixxus.ipm.migration.users;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mock;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -42,10 +42,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.ixxus.ipm.migration.users.MigrateService;
-import com.ixxus.ipm.migration.users.MigrateServiceImpl.EngineService;
+import com.ixxus.ipm.migration.users.MigrateUserServiceImpl.EngineService;
 import com.ixxus.ipm.migration.users.dao.ActivitiProcessDAO;
-import com.sun.xml.ws.api.pipe.FiberContextSwitchInterceptor.Work;
 import com.tradeshift.test.remote.Remote;
 import com.tradeshift.test.remote.RemoteTestRunner;
 
@@ -64,7 +62,7 @@ public class MigrateServiceWorkflowsTest{
     private final List<WorkflowInstance> listWorkflows = new ArrayList<WorkflowInstance>();
     @Inject
     @InjectMocks
-    private MigrateService migrateService;
+    private MigrateUserService migrateUserService;
 
     @Mock
     private PersonService personService;
@@ -86,10 +84,10 @@ public class MigrateServiceWorkflowsTest{
 
     @Mock
     WorkflowNodeConverter workflowNodeConverter;
-    
+
     @Mock
     ActivitiProcessDAO activitiProcessDAO ;
-    
+
 
     @Before
     public void setUp() {
@@ -102,7 +100,7 @@ public class MigrateServiceWorkflowsTest{
         final Map<String, Object> variables = new HashMap<String, Object>();
         listTasks.add(task1);
         listWorkflows.add(workflowInstance);
-        
+
         when(nodeService.getProperty(nodeRefOldUser, ContentModel.PROP_USERNAME)).thenReturn(olduser);
         when(nodeService.getProperty(nodeRefNewUser, ContentModel.PROP_USERNAME)).thenReturn(newuser);
         when(nodeService.getProperty(nodeRefNewUser, ContentModel.PROP_HOMEFOLDER)).thenReturn(nodeRefUserHome);
@@ -118,21 +116,21 @@ public class MigrateServiceWorkflowsTest{
     @Test
     public void testMigrateWorkflows() {
 
-        migrateService.migrateWorkflows(olduser, newuser);
+        migrateUserService.migrateWorkflows(olduser, newuser);
         verify(taskService, times(1)).setAssignee(any(String.class), eq(newuser));
         verify(taskService, times(1)).setVariables(any(String.class), any(HashMap.class));
         verify(activitiProcessDAO,times(1)).executeUpdateAuthor(any(ProcessStarterUser.class));
 
     }
 
-    protected WorkflowInstance makeWorkflowInstance() {        
-    	
-        WorkflowInstance workflowInstance = mock(WorkflowInstance.class);
-        WorkflowDefinition workflowDefinition = mock(WorkflowDefinition.class);
+    protected WorkflowInstance makeWorkflowInstance() {
+
+        final WorkflowInstance workflowInstance = mock(WorkflowInstance.class);
+        final WorkflowDefinition workflowDefinition = mock(WorkflowDefinition.class);
         when(workflowInstance.getDefinition()).thenReturn(workflowDefinition);
         return workflowInstance;
     }
-    
+
     protected WorkflowTask makeTask(final Date date) {
         final String description = "Task Description";
         final String id = "task1";

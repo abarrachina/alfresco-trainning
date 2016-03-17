@@ -9,7 +9,7 @@ public class ActivitiProcessDAOImpl implements ActivitiProcessDAO {
     protected SqlSessionTemplate template;
 
     public ActivitiProcessDAOImpl() {
-
+        // Empty constructor
     }
 
     public ActivitiProcessDAOImpl(final SqlSessionTemplate template) {

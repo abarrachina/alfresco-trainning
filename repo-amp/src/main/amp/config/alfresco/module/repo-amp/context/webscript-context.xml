@@ -13,7 +13,7 @@
 	<bean id="migrate-action" class="com.ixxus.ipm.migration.users.action.executer.MigrateActionExecuter"
 		parent="action-executer">
 		<property name="serviceRegistry" ref="ServiceRegistry" />
-		<property name="migrateService" ref="migrateServiceImpl" />
+		<property name="migrateUserService" ref="migrateUserServiceImpl" />
 		<property name="searchService" ref="SearchService" />
 	</bean>
 

@@ -53,7 +53,7 @@ import com.ixxus.ipm.migration.users.dao.ActivitiProcessDAO;
  *
  */
 @Service
-public class MigrateServiceImpl implements MigrateService{
+public class MigrateUserServiceImpl implements MigrateUserService{
 
 
     //Static properties
@@ -65,7 +65,11 @@ public class MigrateServiceImpl implements MigrateService{
     public static final String KEY_ERROR_USERHOME = "UserHome";
     public static final String KEY_ERROR_TASKINITIATOR = "TaskInitiator";
     public static final String KEY_ERROR_TASKASIGNEE = "TaskAsignee";
-    private static Log logger = LogFactory.getLog(MigrateServiceImpl.class);
+
+    private static final String AND_QUERY = " AND ";
+    private static final String CREATOR_QUERY = "@cm\\:creator:\"";
+
+    private static Log logger = LogFactory.getLog(MigrateUserServiceImpl.class);
 
     @Inject
     private PersonService personService;
@@ -171,8 +175,8 @@ public class MigrateServiceImpl implements MigrateService{
     @Override
     public void migrateContent(final String olduser, final String newuser) {
         String strQuery="TYPE:\"{http://www.alfresco.org/model/content/1.0}content\"";
-        strQuery += " AND ";
-        strQuery += "@cm\\:creator:\"" + olduser + "\"";
+        strQuery += AND_QUERY;
+        strQuery += CREATOR_QUERY + olduser + "\"";
         changeCreator(strQuery, newuser, KEY_ERROR_CONTENT);
 
     }
@@ -180,8 +184,8 @@ public class MigrateServiceImpl implements MigrateService{
     @Override
     public void migrateFolder(final String olduser, final String newuser) {
         String strQuery="TYPE:\"{http://www.alfresco.org/model/content/1.0}folder\"";
-        strQuery += " AND ";
-        strQuery += "@cm\\:creator:\"" + olduser + "\"";
+        strQuery += AND_QUERY;
+        strQuery += CREATOR_QUERY + olduser + "\"";
         changeCreator(strQuery, newuser, KEY_ERROR_FOLDERS);
 
     }
@@ -189,8 +193,8 @@ public class MigrateServiceImpl implements MigrateService{
     @Override
     public void migrateComments(final String olduser, final String newuser) {
         String strQuery="TYPE:\"fm\\:post\"";
-        strQuery += " AND ";
-        strQuery += "@cm\\:creator:\"" + olduser + "\"";
+        strQuery += AND_QUERY;
+        strQuery += CREATOR_QUERY + olduser + "\"";
         changeCreator(strQuery, newuser, KEY_ERROR_COMMENTS);
 
     }
@@ -311,7 +315,7 @@ public class MigrateServiceImpl implements MigrateService{
      * @param newuser
      * @return
      */
-    private MigrateServiceImpl changeWorkflowInitiator(final String olduser, final String newuser) {
+    private MigrateUserServiceImpl changeWorkflowInitiator(final String olduser, final String newuser) {
 
         // Getting noderefs for every person
         final NodeRef oldUserNodeRef = personService.getPerson(olduser);
@@ -353,7 +357,7 @@ public class MigrateServiceImpl implements MigrateService{
     /***
      * Change asignee workflow tasks
      */
-    private MigrateServiceImpl changeTaskAsignee(final String olduser, final String newuser) {
+    private MigrateUserServiceImpl changeTaskAsignee(final String olduser, final String newuser) {
 
         // Searching workflows with olduser like asignee
         final WorkflowTaskQuery query = new WorkflowTaskQuery();
