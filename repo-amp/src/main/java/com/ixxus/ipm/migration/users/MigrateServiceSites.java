@@ -1,9 +1,7 @@
 package com.ixxus.ipm.migration.users;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -38,12 +36,12 @@ public class MigrateServiceSites implements MigrateService{
     @Inject
     private SiteService siteService;
 
-    private final Map<String, ArrayList<NodeRef>> notMigrate = new HashMap<>();
+    private final List<NodeRef> notMigrate = new ArrayList<>();
 
     @SuppressWarnings("unchecked")
     @Override
-    public Map<String, ArrayList<NodeRef>> getNotMigrate() {
-        return notMigrate;
+    public ArrayList<NodeRef> getNotMigrate() {
+        return (ArrayList<NodeRef>) notMigrate;
     }
 
     @Override
@@ -70,6 +68,5 @@ public class MigrateServiceSites implements MigrateService{
 
             }
         }
-        notMigrate.put(KEY_ERROR_SITES, (ArrayList<NodeRef>) sitesNotMigrate);
     }
 }
