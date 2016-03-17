@@ -66,27 +66,15 @@ public class MigrateUserServiceImpl<T> implements MigrateUserService{
     public static final String KEY_ERROR_USERHOME = "UserHome";
     public static final String KEY_ERROR_WORKFLOW = "Workflow";
 	
-	private Map<String, ArrayList<T>> notMigrated = new HashMap<>(); 
+	private Map<String, List<T>> notMigrated = new HashMap<>(); 
 
     
     @Override
-    public Map<String, ArrayList<T>> getNotMigrate(){
+    public Map<String, List<T>> getNotMigrate(){
     	
     	return notMigrated;
     }
     
-    private void addNoMigrated(ArrayList<T> list, String type){
-    	
-    	notMigrated.put(type, list);    	
-    }
-    
-    private void migrate(String olduser,String newuser, Boolean toMigrate, String type){
-    	if (toMigrate){
-    		MigrateService migrateService = MigrateServiceFactory.createMigrateService(type);
-        	migrateService.migrate(olduser, newuser);
-    	}    	
-    }
-
     @Override
     public void migrateSites(final String olduser, final String newuser, Boolean toMigrate) {
     	migrate(olduser, newuser, toMigrate, MigrateServiceFactory.SITES);
@@ -130,4 +118,18 @@ public class MigrateUserServiceImpl<T> implements MigrateUserService{
 
     	migrate(olduser, newuser, toMigrate, MigrateServiceFactory.WORKFLOWS);
     }
+    
+    private void addNoMigrated(List<T> list, String type){
+    	
+    	notMigrated.put(type, list);    	
+    }
+    
+    private void migrate(String olduser,String newuser, Boolean toMigrate, String type){
+    	if (toMigrate){
+    		MigrateService migrateService = MigrateServiceFactory.createMigrateService(type);
+        	migrateService.migrate(olduser, newuser);
+        	addNoMigrated(migrateService.getNotMigrate(),type);
+    	}    	
+    }
+
 }
