@@ -67,11 +67,11 @@ public class MigrateServiceUserHome extends MigrateServiceContent {
 
 	}
 
-	@Override
-	public <T> Map<String, List<T>> getNotMigrate() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
+    @Override
+    public Map<String, ArrayList<NodeRef>> getNotMigrate() {
+        return notMigrate;
+    }
    
 	
 }
