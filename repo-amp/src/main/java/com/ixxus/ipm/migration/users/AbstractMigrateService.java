@@ -28,12 +28,6 @@ import org.springframework.stereotype.Service;
 @Service
 public abstract class AbstractMigrateService implements MigrateService{
 
-
-    //Static properties
-    public static final String KEY_ERROR_CONTENT = "Content";
-    public static final String KEY_ERROR_FOLDERS = "Folders";
-    public static final String KEY_ERROR_COMMENTS = "Comments";
-
     private static Log logger = LogFactory.getLog(AbstractMigrateService.class);
 
     @Inject
