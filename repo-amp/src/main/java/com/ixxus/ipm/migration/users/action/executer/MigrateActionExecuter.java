@@ -21,6 +21,7 @@ import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.ixxus.ipm.migration.users.MigrateUserService;
@@ -107,28 +108,14 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
         final Boolean favorites = Boolean.valueOf(paramFavorites.toString());
         final Boolean workflows = Boolean.valueOf(paramWorkflows.toString());
 
-        if (workflows){
-            migrateUserServiceImpl.migrateWorkflows(olduser, newuser);
-        }
-        if (sites){
-            migrateUserServiceImpl.migrateSites(olduser, newuser);
-        }
-        if (groups){
-            migrateUserServiceImpl.migrateGroups(olduser, newuser);
-        }
-        if (content){
-            migrateUserServiceImpl.migrateContent(olduser, newuser);
-            migrateUserServiceImpl.migrateFolder(olduser, newuser);
-        }
-        if (comments){
-            migrateUserServiceImpl.migrateComments(olduser, newuser);
-        }
-        if (userhome){
-            migrateUserServiceImpl.migrateUserHome(olduser, newuser);
-        }
-        if (favorites){
-            migrateUserServiceImpl.migratePreferences(olduser, newuser);
-        }
+        migrateUserServiceImpl.migrateWorkflows(olduser, newuser, workflows);
+        migrateUserServiceImpl.migrateSites(olduser, newuser, sites);
+        migrateUserServiceImpl.migrateGroups(olduser, newuser, groups);
+        migrateUserServiceImpl.migrateContent(olduser, newuser, content);
+        migrateUserServiceImpl.migrateFolder(olduser, newuser, content);
+        migrateUserServiceImpl.migrateComments(olduser, newuser, comments);
+        migrateUserServiceImpl.migrateUserHome(olduser, newuser, userhome);
+        migrateUserServiceImpl.migratePreferences(olduser, newuser, favorites);
 
         sendEmail();
     }
@@ -170,16 +157,15 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
     private Map<String, Serializable> prepareTemplate(){
 
         final Map<String, Serializable> templateArgs = new HashMap<>();
-        final Map<String, ArrayList<NodeRef>> notMigrate = migrateUserServiceImpl.getNotMigrate();
-        final Map<String, ArrayList<String>> taskNoMigrated = migrateUserServiceImpl.getTaskNoMigrated();
-        final ArrayList<NodeRef> sitesNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_SITES);
-        final ArrayList<NodeRef> groupsNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_GROUPS);
-        final ArrayList<NodeRef> contentNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_CONTENT);
-        final ArrayList<NodeRef> foldersNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_FOLDERS);
-        final ArrayList<NodeRef> commentsNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_COMMENTS);
-        final ArrayList<NodeRef> userHomeNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_USERHOME);
-        final ArrayList<String> taskInitiatorNoMigrated = taskNoMigrated.get(MigrateUserServiceImpl.KEY_ERROR_TASKINITIATOR);
-        final ArrayList<NodeRef> taskAsigneeNoMigrated = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_TASKASIGNEE);
+        final Map<String, ArrayList<T>> notMigrate = migrateUserServiceImpl.getNotMigrate();
+        final ArrayList<T> sitesNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_SITES);
+        final ArrayList<T> groupsNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_GROUPS);
+        final ArrayList<T> contentNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_CONTENT);
+        final ArrayList<T> foldersNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_FOLDERS);
+        final ArrayList<T> commentsNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_COMMENTS);
+        final ArrayList<T> userHomeNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_USERHOME);
+        final ArrayList<T> taskInitiatorNoMigrated = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_TASKINITIATOR);
+        final ArrayList<T> taskAsigneeNoMigrated = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_TASKASIGNEE);
 
 
         if (!MigrateActionUtils.isNullOrEmpty(sitesNotMigrate)){
@@ -209,8 +195,8 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
 
         return templateArgs;
     }
-    
+
     public String getPathTemplate() {
-		return pathTemplate;
-	}
+        return pathTemplate;
+    }
 }
