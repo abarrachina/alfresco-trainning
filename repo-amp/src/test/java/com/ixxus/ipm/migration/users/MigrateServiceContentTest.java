@@ -115,7 +115,7 @@ public class MigrateServiceContentTest {
         when(nodeService.getType(any(NodeRef.class))).thenReturn(ContentModel.TYPE_CONTENT);
         when(rs.getNodeRefs()).thenReturn(listNodeRefs);
 
-        migrateService.migrateComments(olduser, newuser);
+        migrateUserService.migrateComments(olduser, newuser);
         verify(nodeService, times(1)).setProperty(content1, ContentModel.PROP_CREATOR, newuser);
         verify(nodeService, times(1)).setProperty(content2, ContentModel.PROP_CREATOR, newuser);
         verify(ownableService, times(1)).setOwner(content1, newuser);
@@ -137,7 +137,7 @@ public class MigrateServiceContentTest {
         when(nodeService.getType(any(NodeRef.class))).thenReturn(ContentModel.TYPE_FOLDER);
         when(rs.getNodeRefs()).thenReturn(listNodeRefs);
 
-        migrateService.migrateFolder(olduser, newuser);
+        migrateUserService.migrateFolder(olduser, newuser);
         verify(nodeService, times(1)).setProperty(content1, ContentModel.PROP_CREATOR, newuser);
         verify(nodeService, times(1)).setProperty(content2, ContentModel.PROP_CREATOR, newuser);
         verify(ownableService, times(1)).setOwner(content1, newuser);
