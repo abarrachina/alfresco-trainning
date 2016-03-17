@@ -3,8 +3,6 @@ package com.ixxus.ipm.migration.users;
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.alfresco.service.cmr.repository.NodeRef;
-
 /***
  *
  * @author nazareth.jimenez@ixxus.com
