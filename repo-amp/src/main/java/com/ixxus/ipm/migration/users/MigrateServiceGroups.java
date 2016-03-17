@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import org.alfresco.repo.security.authority.UnknownAuthorityException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityService;
-import org.alfresco.service.cmr.site.SiteService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
@@ -33,15 +32,12 @@ public class MigrateServiceGroups implements MigrateService{
     @Inject
     private AuthorityService authorityService;
 
-    @Inject
-    private SiteService siteService;
-
     private final List<NodeRef> notMigrate = new ArrayList<>();
 
     @SuppressWarnings("unchecked")
     @Override
-    public ArrayList<NodeRef> getNotMigrate() {
-        return (ArrayList<NodeRef>) notMigrate;
+    public List<NodeRef> getNotMigrate() {
+        return notMigrate;
     }
 
     @Override

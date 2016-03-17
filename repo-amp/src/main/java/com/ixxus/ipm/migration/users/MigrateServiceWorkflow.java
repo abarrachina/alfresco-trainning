@@ -31,26 +31,26 @@ import com.ixxus.ipm.migration.users.dao.ActivitiProcessDAO;
 
 public class MigrateServiceWorkflow implements MigrateService {
 
-	@Inject
-	private ServiceRegistry serviceRegistry;
-	
+    @Inject
+    private ServiceRegistry serviceRegistry;
+
     @Inject
     private PersonService personService;
-    
+
     @Inject
     private NodeService nodeService;
-    
+
     @Inject
     private TaskService taskService;
-    
+
     @Inject
     private ActivitiProcessDAO activitiProcessDAO ;
-    
-    private List<String> notMigrated = new ArrayList<>();
-    
-    private static Log logger = LogFactory.getLog(MigrateUserServiceImpl.class);    
-    
-        
+
+    private final List<String> notMigrated = new ArrayList<>();
+
+    private static Log logger = LogFactory.getLog(MigrateUserServiceImpl.class);
+
+
     @FunctionalInterface
     public interface EngineService{
         public String getLocalId(final String id);
@@ -58,20 +58,21 @@ public class MigrateServiceWorkflow implements MigrateService {
 
     EngineService engineService = BPMEngineRegistry::getLocalId;
 
-		
-	@Override
-	public List<String> getNotMigrate() {
 
-		return notMigrated;
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<String> getNotMigrate() {
+
+        return notMigrated;
+    }
 
 
-	@Override
-	public void migrate(String olduser, String newuser) {
-		this.changeTaskAsignee(olduser, newuser).changeWorkflowInitiator(olduser, newuser);		
-	}
-	
-	/***
+    @Override
+    public void migrate(final String olduser, final String newuser) {
+        this.changeTaskAsignee(olduser, newuser).changeWorkflowInitiator(olduser, newuser);
+    }
+
+    /***
      * Get Workflows started by an user
      * @param oldUserNodeRef Workflow initiator
      * @return
@@ -143,7 +144,7 @@ public class MigrateServiceWorkflow implements MigrateService {
         // Getting noderefs for every person
         final NodeRef oldUserNodeRef = personService.getPerson(olduser);
         final List<WorkflowInstance> listWorkflows = getWorkflowsByInitiator(oldUserNodeRef);
-        
+
         for (final WorkflowInstance workflow : listWorkflows) {
             final List<WorkflowTask> tasks = this.getWorkflowTask(workflow);
             for (final WorkflowTask task : tasks){
@@ -194,7 +195,7 @@ public class MigrateServiceWorkflow implements MigrateService {
                     taskService.setAssignee(taskId, newuser);
                 }
             }catch(final Exception e){
-            	this.notMigrated.add(task.getId()+ " " +task.getName());
+                this.notMigrated.add(task.getId()+ " " +task.getName());
                 logger.error("Failing setting asignee", e);
             }
         }
