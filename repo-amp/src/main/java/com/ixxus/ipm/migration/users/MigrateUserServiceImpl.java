@@ -70,14 +70,14 @@ public class MigrateUserServiceImpl<T> implements MigrateUserService{
 
     
     @Override
-    public <T> Map<String, ArrayList<T>> getNotMigrate(){
+    public Map<String, ArrayList<T>> getNotMigrate(){
     	
     	return notMigrated;
     }
     
-    private <T> void addNoMigrated(ArrayList<T> list, String type){
+    private void addNoMigrated(ArrayList<T> list, String type){
     	
-    	noMigrated.put(type, list);    	
+    	notMigrated.put(type, list);    	
     }
     
     private void migrate(String olduser,String newuser, Boolean toMigrate, String type){
