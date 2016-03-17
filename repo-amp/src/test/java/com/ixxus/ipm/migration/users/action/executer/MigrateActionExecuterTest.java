@@ -76,7 +76,6 @@ public class MigrateActionExecuterTest {
         when(resultSet.getNodeRef(0)).thenReturn(templateNodeRef);
         when(searchService.query(any(StoreRef.class),eq(SearchService.LANGUAGE_LUCENE),any(String.class))).thenReturn(resultSet);
         when(migrateServiceImpl.getNotMigrate()).thenReturn(noMigrated);
-        when(migrateServiceImpl.getTaskNoMigrated()).thenReturn(taskNoMigrated);
         when(serviceRegistry.getActionService()).thenReturn(actionService);
         when(actionService.createAction(any(String.class))).thenReturn(actionMail);
     }
@@ -98,14 +97,14 @@ public class MigrateActionExecuterTest {
 		//Executing tested method
 		migrateActionExecuter.executeImpl(action, nodeRef);	
 		
-		verify(migrateServiceImpl,times(1)).migrateWorkflows(olduser, newuser);
-		verify(migrateServiceImpl,times(1)).migrateSites(olduser, newuser);
-		verify(migrateServiceImpl,times(1)).migrateGroups(olduser, newuser);
-		verify(migrateServiceImpl,times(1)).migrateContent(olduser, newuser);
-		verify(migrateServiceImpl,times(1)).migrateFolder(olduser, newuser);
-		verify(migrateServiceImpl,times(1)).migrateComments(olduser, newuser);
-		verify(migrateServiceImpl,times(1)).migrateUserHome(olduser, newuser);
-		verify(migrateServiceImpl,times(1)).migratePreferences(olduser, newuser);
+		verify(migrateServiceImpl,times(1)).migrateWorkflows(olduser, newuser, true);
+		verify(migrateServiceImpl,times(1)).migrateSites(olduser, newuser, true);
+		verify(migrateServiceImpl,times(1)).migrateGroups(olduser, newuser, true);
+		verify(migrateServiceImpl,times(1)).migrateContent(olduser, newuser, true);
+		verify(migrateServiceImpl,times(1)).migrateFolder(olduser, newuser, true);
+		verify(migrateServiceImpl,times(1)).migrateComments(olduser, newuser, true);
+		verify(migrateServiceImpl,times(1)).migrateUserHome(olduser, newuser, true);
+		verify(migrateServiceImpl,times(1)).migratePreferences(olduser, newuser, true);
 		StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 		verify(searchService).query(storeRef,SearchService.LANGUAGE_LUCENE, migrateActionExecuter.getPathTemplate());
 
@@ -137,8 +136,7 @@ public class MigrateActionExecuterTest {
 		
 		ArrayList<String> arrayList = new ArrayList<>();
 		arrayList.add("dummy");
-		noMigrated.put(MigrateUserServiceImpl.KEY_ERROR_TASKINITIATOR, arrayList);
-		noMigrated.put(MigrateUserServiceImpl.KEY_ERROR_TASKASIGNEE, arrayList);
+		noMigrated.put(MigrateUserServiceImpl.KEY_ERROR_WORKFLOW, arrayList);
 		
 		return noMigrated;
 	}

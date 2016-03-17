@@ -92,7 +92,7 @@ public class MigrateServiceUserHomeTest {
 
     @Test
     public void testMigrateHome() {
-        migrateUserService.migrateUserHome(olduser, newuser);
+        migrateUserService.migrateUserHome(olduser, newuser, true);
         verify(nodeService, times(1)).setProperty(child2.getChildRef(), ContentModel.PROP_CREATOR, newuser);
         verify(nodeService, times(1)).setProperty(child2.getChildRef(), ContentModel.PROP_MODIFIER, newuser);
     }

@@ -42,7 +42,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.ixxus.ipm.migration.users.MigrateUserServiceImpl.EngineService;
+import com.ixxus.ipm.migration.users.MigrateServiceWorkflow.EngineService;
 import com.ixxus.ipm.migration.users.dao.ActivitiProcessDAO;
 import com.tradeshift.test.remote.Remote;
 import com.tradeshift.test.remote.RemoteTestRunner;
@@ -116,7 +116,7 @@ public class MigrateServiceWorkflowsTest{
     @Test
     public void testMigrateWorkflows() {
 
-        migrateUserService.migrateWorkflows(olduser, newuser);
+        migrateUserService.migrateWorkflows(olduser, newuser, true);
         verify(taskService, times(1)).setAssignee(any(String.class), eq(newuser));
         verify(taskService, times(1)).setVariables(any(String.class), any(HashMap.class));
         verify(activitiProcessDAO,times(1)).executeUpdateAuthor(any(ProcessStarterUser.class));

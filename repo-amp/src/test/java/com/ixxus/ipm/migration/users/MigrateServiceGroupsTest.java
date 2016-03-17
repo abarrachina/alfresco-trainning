@@ -62,7 +62,7 @@ public class MigrateServiceGroupsTest {
 
     @Test
     public void testMigrateGroups() {
-        migrateUserService.migrateGroups(olduser, newuser);
+        migrateUserService.migrateGroups(olduser, newuser, true);
         verify(authorityService, times(1)).addAuthority("Group1", newuser);
         verify(authorityService, times(1)).addAuthority("Group2", newuser);
     }
