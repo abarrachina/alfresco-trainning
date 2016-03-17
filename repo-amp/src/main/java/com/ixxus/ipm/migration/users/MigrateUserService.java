@@ -77,6 +77,6 @@ public interface MigrateUserService{
      *
      * @return Content that the process can't migrate
      */
-    public Map<String, ArrayList<NodeRef>> getNotMigrate();
+    public <T> Map<String, ArrayList<T>> getNotMigrate();
 
 }
