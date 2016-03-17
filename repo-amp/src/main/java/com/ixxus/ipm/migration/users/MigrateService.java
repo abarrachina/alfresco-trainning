@@ -1,9 +1,11 @@
 package com.ixxus.ipm.migration.users;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-import org.alfresco.service.cmr.repository.NodeRef;
+
+
+
 
 /***
  *
@@ -18,13 +20,13 @@ public interface MigrateService{
      * @param olduser
      * @param newuser
      */
-    public void migrate (final String olduser, final String newuser, final Boolean toMigrate);
+    public void migrate (final String olduser, final String newuser);
 
 
     /***
      *
      * @return Content that the process can't migrate
      */
-    public Map<String, ArrayList<NodeRef>> getNotMigrate();
-    public Map<String, ArrayList<String>> getTaskNoMigrated();
+    public <T> Map<String, List<T>> getNotMigrate();
+
 }
