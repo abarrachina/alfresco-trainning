@@ -26,9 +26,11 @@ import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.stereotype.Service;
 
 import com.ixxus.ipm.migration.users.dao.ActivitiProcessDAO;
 
+@Service
 public class MigrateServiceWorkflow implements MigrateService {
 
     @Inject
