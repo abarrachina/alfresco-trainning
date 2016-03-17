@@ -18,6 +18,7 @@ import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.junit.Before;
@@ -51,7 +52,7 @@ public class MigrateServiceUserHomeTest {
 
     @Inject
     @InjectMocks
-    private MigrateUserService migrateUserService;
+    private MigrateServiceUserHome migrateServiceUserHome;
 
     @Mock
     private PersonService personService;
@@ -61,10 +62,13 @@ public class MigrateServiceUserHomeTest {
 
     @Mock
     private BehaviourFilter policyBehaviourFilter;
+    
+    @Mock
+    private OwnableService ownableService;
 
     @Test
     public void testWiring() {
-        assertNotNull(migrateUserService);
+        assertNotNull(migrateServiceUserHome);
     }
 
     @Before
@@ -87,12 +91,11 @@ public class MigrateServiceUserHomeTest {
         when(nodeService.getChildByName(eq(nodeRefNewHome), eq(ContentModel.ASSOC_CONTAINS), any(String.class))).thenReturn(null);
         when(nodeService.moveNode(nodeRefChild1OldUser, nodeRefNewHome,  ContentModel.ASSOC_CONTAINS, ContentModel.ASSOC_CHILDREN)).thenReturn(child2);
         when(nodeService.getType(any(NodeRef.class))).thenReturn(ContentModel.TYPE_CONTENT);
-
     }
 
     @Test
     public void testMigrateHome() {
-        migrateUserService.migrateUserHome(olduser, newuser, true);
+    	migrateServiceUserHome.migrate(olduser, newuser);
         verify(nodeService, times(1)).setProperty(child2.getChildRef(), ContentModel.PROP_CREATOR, newuser);
         verify(nodeService, times(1)).setProperty(child2.getChildRef(), ContentModel.PROP_MODIFIER, newuser);
     }
