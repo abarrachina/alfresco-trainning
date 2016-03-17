@@ -5,7 +5,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,6 +103,28 @@ public class MigrateServiceContentTest {
     }
 
     @Test
+    public void testMigrateComment() {
+
+        final ResultSet rs = mock(AbstractResultSet.class);
+        final List<NodeRef> listNodeRefs = new ArrayList<>();
+        listNodeRefs.add(content1);
+        listNodeRefs.add(content2);
+
+        when(searchService.query(eq(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE), eq(SearchService.LANGUAGE_LUCENE), any(String.class))).
+        thenReturn(rs);
+        when(nodeService.getType(any(NodeRef.class))).thenReturn(ContentModel.TYPE_CONTENT);
+        when(rs.getNodeRefs()).thenReturn(listNodeRefs);
+
+        migrateService.migrateComments(olduser, newuser);
+        verify(nodeService, times(1)).setProperty(content1, ContentModel.PROP_CREATOR, newuser);
+        verify(nodeService, times(1)).setProperty(content2, ContentModel.PROP_CREATOR, newuser);
+        verify(ownableService, times(1)).setOwner(content1, newuser);
+        verify(ownableService, times(1)).setOwner(content2, newuser);
+        verify(nodeService, times(1)).setProperty(content1, ContentModel.PROP_MODIFIER, newuser);
+        verify(nodeService, times(1)).setProperty(content2, ContentModel.PROP_MODIFIER, newuser);
+    }
+    
+    @Test
     public void testMigrateFolder() {
 
         final ResultSet rs = mock(AbstractResultSet.class);
@@ -115,7 +137,7 @@ public class MigrateServiceContentTest {
         when(nodeService.getType(any(NodeRef.class))).thenReturn(ContentModel.TYPE_FOLDER);
         when(rs.getNodeRefs()).thenReturn(listNodeRefs);
 
-        migrateUserService.migrateContent(olduser, newuser);
+        migrateService.migrateFolder(olduser, newuser);
         verify(nodeService, times(1)).setProperty(content1, ContentModel.PROP_CREATOR, newuser);
         verify(nodeService, times(1)).setProperty(content2, ContentModel.PROP_CREATOR, newuser);
         verify(ownableService, times(1)).setOwner(content1, newuser);

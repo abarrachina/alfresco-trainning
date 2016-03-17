@@ -209,4 +209,8 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
 
         return templateArgs;
     }
+    
+    public String getPathTemplate() {
+		return pathTemplate;
+	}
 }
