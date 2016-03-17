@@ -2,10 +2,10 @@ package com.ixxus.ipm.migration.users;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +45,7 @@ public class MigrateServiceContentTest {
 
     @Inject
     @InjectMocks
-    private MigrateUserService migrateUserService;
+    private MigrateServiceContent migrateServiceContent;
 
     @Mock
     private SearchService searchService;
@@ -68,15 +68,9 @@ public class MigrateServiceContentTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-
-
         //Doing mock for MigrateService.changeCreator
         content1 = new NodeRef("workspace://SpacesStore/contentnode1");
         content2 = new NodeRef("workspace://SpacesStore/contentnode2");
-
-        //Doing mock for changeCreatorModifier
-        final NodeRef folderNodeRef = new NodeRef("workspace://SpacesStore/oldnoderef");
-        final NodeRef contentNodeRef = new NodeRef("workspace://SpacesStore/oldnoderef");
 
     }
 
@@ -93,7 +87,7 @@ public class MigrateServiceContentTest {
         when(nodeService.getType(any(NodeRef.class))).thenReturn(ContentModel.TYPE_CONTENT);
         when(rs.getNodeRefs()).thenReturn(listNodeRefs);
 
-        migrateUserService.migrateContent(olduser, newuser, true);
+        migrateServiceContent.migrate(olduser, newuser);
         verify(nodeService, times(1)).setProperty(content1, ContentModel.PROP_CREATOR, newuser);
         verify(nodeService, times(1)).setProperty(content2, ContentModel.PROP_CREATOR, newuser);
         verify(ownableService, times(1)).setOwner(content1, newuser);
@@ -115,7 +109,7 @@ public class MigrateServiceContentTest {
         when(nodeService.getType(any(NodeRef.class))).thenReturn(ContentModel.TYPE_CONTENT);
         when(rs.getNodeRefs()).thenReturn(listNodeRefs);
 
-        migrateUserService.migrateComments(olduser, newuser, true);
+        migrateServiceContent.migrate(olduser, newuser);
         verify(nodeService, times(1)).setProperty(content1, ContentModel.PROP_CREATOR, newuser);
         verify(nodeService, times(1)).setProperty(content2, ContentModel.PROP_CREATOR, newuser);
         verify(ownableService, times(1)).setOwner(content1, newuser);
@@ -123,7 +117,7 @@ public class MigrateServiceContentTest {
         verify(nodeService, times(1)).setProperty(content1, ContentModel.PROP_MODIFIER, newuser);
         verify(nodeService, times(1)).setProperty(content2, ContentModel.PROP_MODIFIER, newuser);
     }
-    
+
     @Test
     public void testMigrateFolder() {
 
@@ -137,7 +131,7 @@ public class MigrateServiceContentTest {
         when(nodeService.getType(any(NodeRef.class))).thenReturn(ContentModel.TYPE_FOLDER);
         when(rs.getNodeRefs()).thenReturn(listNodeRefs);
 
-        migrateUserService.migrateFolder(olduser, newuser, true);
+        migrateServiceContent.migrate(olduser, newuser);
         verify(nodeService, times(1)).setProperty(content1, ContentModel.PROP_CREATOR, newuser);
         verify(nodeService, times(1)).setProperty(content2, ContentModel.PROP_CREATOR, newuser);
         verify(ownableService, times(1)).setOwner(content1, newuser);

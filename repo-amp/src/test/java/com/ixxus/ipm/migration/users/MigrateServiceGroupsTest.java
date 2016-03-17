@@ -35,14 +35,14 @@ public class MigrateServiceGroupsTest {
 
     @Inject
     @InjectMocks
-    private MigrateUserService migrateUserService;
+    private MigrateServiceGroups migrateServiceGroups;
 
     @Mock
     private AuthorityService authorityService;
 
     @Test
     public void testWiring() {
-        assertNotNull(migrateUserService);
+        assertNotNull(migrateServiceGroups);
     }
 
     @Before
@@ -62,7 +62,7 @@ public class MigrateServiceGroupsTest {
 
     @Test
     public void testMigrateGroups() {
-        migrateUserService.migrateGroups(olduser, newuser, true);
+        migrateServiceGroups.migrate(olduser, newuser);
         verify(authorityService, times(1)).addAuthority("Group1", newuser);
         verify(authorityService, times(1)).addAuthority("Group2", newuser);
     }

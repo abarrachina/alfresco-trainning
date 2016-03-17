@@ -39,7 +39,7 @@ public class MigrateServiceSitesTest {
 
     @Inject
     @InjectMocks
-    private MigrateUserService migrateUserService;
+    private MigrateServiceSites migrateServiceSites;
 
     @Mock
     private AuthorityService authorityService;
@@ -73,21 +73,21 @@ public class MigrateServiceSitesTest {
     public void migrateToAnExistingUserTest() {
 
         addSiteToNewUser();
-        migrateUserService.migrateSites(olduser, newuser, true);
+        migrateServiceSites.migrate(olduser, newuser);
         verify(authorityService, never()).addAuthority(getDummyAuthority(), newuser);
         siteNames.clear();
     }
     @Test
     public void migrateToAnUnexistingUserTest() {
 
-        migrateUserService.migrateSites(olduser, newuser, true);
+        migrateServiceSites.migrate(olduser, newuser);
         verify(authorityService, times(1)).addAuthority(getDummyAuthority(), newuser);
     }
 
     @Test
     public void unknownAuthorityExceptionTest(){
         doThrow(new UnknownAuthorityException("")).when(authorityService).addAuthority(getDummyAuthority(), newuser);
-        migrateUserService.migrateSites(olduser, newuser, true);
+        migrateServiceSites.migrate(olduser, newuser);
         verify(site,times(1)).getNodeRef();
     }
 
