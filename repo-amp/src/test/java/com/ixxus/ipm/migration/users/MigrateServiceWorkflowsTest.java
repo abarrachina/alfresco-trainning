@@ -60,9 +60,10 @@ public class MigrateServiceWorkflowsTest{
     private static final String URI = "http://test";
     private final List<WorkflowTask> listTasks = new ArrayList<WorkflowTask>();
     private final List<WorkflowInstance> listWorkflows = new ArrayList<WorkflowInstance>();
+    
     @Inject
     @InjectMocks
-    private MigrateUserService migrateUserService;
+    private MigrateServiceWorkflow migrateServiceWorkflow;
 
     @Mock
     private PersonService personService;
@@ -116,7 +117,7 @@ public class MigrateServiceWorkflowsTest{
     @Test
     public void testMigrateWorkflows() {
 
-        migrateUserService.migrateWorkflows(olduser, newuser, true);
+    	migrateServiceWorkflow.migrate(olduser, newuser);
         verify(taskService, times(1)).setAssignee(any(String.class), eq(newuser));
         verify(taskService, times(1)).setVariables(any(String.class), any(HashMap.class));
         verify(activitiProcessDAO,times(1)).executeUpdateAuthor(any(ProcessStarterUser.class));

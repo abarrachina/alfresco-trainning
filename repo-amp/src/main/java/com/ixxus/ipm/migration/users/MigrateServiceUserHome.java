@@ -12,7 +12,9 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.stereotype.Service;
 
+@Service
 public class MigrateServiceUserHome extends AbstractMigrateService {
 
     public static final String KEY_ERROR_USERHOME = "UserHome";
