@@ -10,6 +10,7 @@ public class MigrateServiceFactory {
 	public static final String USERHOME = "userhome";
 	public static final String WORKFLOWS = "workflows";
 	
+	private MigrateServiceFactory(){}
 	
 	public static MigrateService createMigrateService(String type){
 		
