@@ -84,14 +84,8 @@
          <div class="field-row">
  			<input type="checkbox" class="crud-input" id="${el}-items-userhome" type="text" maxlength="256" value="true"/>
          	<label class="crud-label" for="${el}-items-userhome">${msg("label.items.userhome")}</label>
-         </div>
-         
-        
-         <div class="field-row">
- 			<input type="checkbox" class="crud-input" id="${el}-items-likes" type="text" maxlength="256" value="true"/>
-         	<label class="crud-label" for="${el}-items-likes">${msg("label.items.likes")}</label>
-         </div>
-         
+         </div>       
+       
          <div class="field-row">
  			<input type="checkbox" class="crud-input" id="${el}-items-favorites" type="text" maxlength="256" value="true"/>
          	<label class="crud-label" for="${el}-items-favorites">${msg("label.items.favorites")}</label>

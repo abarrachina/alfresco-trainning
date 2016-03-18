@@ -1,0 +1,11 @@
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"   "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<typeAliases>
+		<typeAlias alias="ProcessStarterUser" type="com.ixxus.ipm.migration.users.ProcessStarterUser"/>		
+	</typeAliases>
+	
+	<mappers>	
+		<mapper resource="classpath:alfresco/module/${project.artifactId}/ibatis/#resource.dialect#/workflow-initiator-SqlMap.xml"/>
+	</mappers>
+
+</configuration>
