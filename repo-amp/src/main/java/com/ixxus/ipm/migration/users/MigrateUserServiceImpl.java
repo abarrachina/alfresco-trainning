@@ -92,39 +92,39 @@ public class MigrateUserServiceImpl<T> implements MigrateUserService{
 
         notMigrated.put(type, list);
     }
-    
-    private String getBeanName(String type){
-    	
-    	String result = "";
-    	
-    	switch (type) {
-		case MigrateActionExecuter.PARAM_COMMENT:
-			result = "MigrateServiceComments";
-			break;
-		case MigrateActionExecuter.PARAM_CONTENT:
-			result = "MigrateServiceContent";
-			break;
-		case MigrateActionExecuter.PARAM_FAVORITES:
-			result = "MigrateServicePreferences";
-			break;
-		case MigrateActionExecuter.PARAM_GROUPS:
-			result = "MigrateServiceGroups";
-			break;
-		case MigrateActionExecuter.PARAM_SITES:
-			result = "MigrateServiceSites";
-			break;
-		case MigrateActionExecuter.PARAM_USERHOME:
-			result = "MigrateServiceUserHome";
-			break;
-		case MigrateActionExecuter.PARAM_WORKFLOWS:
-			result = "MigrateServiceWorkflow";
-			break;
 
-		default:
-			break;
-		}
-    	
-    	return result;
+    private String getBeanName(final String type){
+
+        String result = "";
+
+        switch (type) {
+        case MigrateActionExecuter.PARAM_COMMENT:
+            result = "MigrateServiceComments";
+            break;
+        case MigrateActionExecuter.PARAM_CONTENT:
+            result = "MigrateServiceContent";
+            break;
+        case MigrateActionExecuter.PARAM_FAVORITES:
+            result = "MigrateServicePreferences";
+            break;
+        case MigrateActionExecuter.PARAM_GROUPS:
+            result = "MigrateServiceGroups";
+            break;
+        case MigrateActionExecuter.PARAM_SITES:
+            result = "MigrateServiceSites";
+            break;
+        case MigrateActionExecuter.PARAM_USERHOME:
+            result = "MigrateServiceUserHome";
+            break;
+        case MigrateActionExecuter.PARAM_WORKFLOWS:
+            result = "MigrateServiceWorkflow";
+            break;
+
+        default:
+            break;
+        }
+
+        return result;
     }
 
     private void migrate(final String olduser,final String newuser, final Boolean toMigrate, final String type){
