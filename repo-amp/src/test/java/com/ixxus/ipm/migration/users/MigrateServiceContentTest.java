@@ -42,6 +42,8 @@ public class MigrateServiceContentTest {
     private static String newuser = "NewUser";
     private static String olduser = "OldUser";
     private NodeRef content1, content2;
+    private static final String AND_QUERY = " AND ";
+    private static final String CREATOR_QUERY = "@cm\\:creator:\"";
 
     @Inject
     @InjectMocks
@@ -82,30 +84,11 @@ public class MigrateServiceContentTest {
         listNodeRefs.add(content1);
         listNodeRefs.add(content2);
 
-        when(searchService.query(eq(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE), eq(SearchService.LANGUAGE_LUCENE), any(String.class))).
-        thenReturn(rs);
-        when(nodeService.getType(any(NodeRef.class))).thenReturn(ContentModel.TYPE_CONTENT);
-        when(rs.getNodeRefs()).thenReturn(listNodeRefs);
+        String strQuery="TYPE:\"{http://www.alfresco.org/model/content/1.0}content\"";
+        strQuery += AND_QUERY;
+        strQuery += CREATOR_QUERY + olduser + "\"";
 
-        migrateServiceContent.migrate(olduser, newuser);
-        verify(nodeService, times(1)).setProperty(content1, ContentModel.PROP_CREATOR, newuser);
-        verify(nodeService, times(1)).setProperty(content2, ContentModel.PROP_CREATOR, newuser);
-        verify(ownableService, times(1)).setOwner(content1, newuser);
-        verify(ownableService, times(1)).setOwner(content2, newuser);
-        verify(nodeService, times(1)).setProperty(content1, ContentModel.PROP_MODIFIER, newuser);
-        verify(nodeService, times(1)).setProperty(content2, ContentModel.PROP_MODIFIER, newuser);
-    }
-
-    @Test
-    public void testMigrateComment() {
-
-        final ResultSet rs = mock(AbstractResultSet.class);
-        final List<NodeRef> listNodeRefs = new ArrayList<>();
-        listNodeRefs.add(content1);
-        listNodeRefs.add(content2);
-
-        when(searchService.query(eq(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE), eq(SearchService.LANGUAGE_LUCENE), any(String.class))).
-        thenReturn(rs);
+        when(searchService.query(eq(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE), eq(SearchService.LANGUAGE_LUCENE), eq(strQuery))).thenReturn(rs);
         when(nodeService.getType(any(NodeRef.class))).thenReturn(ContentModel.TYPE_CONTENT);
         when(rs.getNodeRefs()).thenReturn(listNodeRefs);
 
@@ -126,7 +109,11 @@ public class MigrateServiceContentTest {
         listNodeRefs.add(content1);
         listNodeRefs.add(content2);
 
-        when(searchService.query(eq(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE), eq(SearchService.LANGUAGE_LUCENE), any(String.class))).
+        String strQuery="TYPE:\"{http://www.alfresco.org/model/content/1.0}folder\"";
+        strQuery += AND_QUERY;
+        strQuery += CREATOR_QUERY + olduser + "\"";
+
+        when(searchService.query(eq(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE), eq(SearchService.LANGUAGE_LUCENE), eq(strQuery))).
         thenReturn(rs);
         when(nodeService.getType(any(NodeRef.class))).thenReturn(ContentModel.TYPE_FOLDER);
         when(rs.getNodeRefs()).thenReturn(listNodeRefs);
