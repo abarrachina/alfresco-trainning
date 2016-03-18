@@ -55,8 +55,8 @@ public abstract class AbstractMigrateService implements MigrateService{
 
     @SuppressWarnings("unchecked")
     @Override
-    public ArrayList<NodeRef> getNotMigrate() {
-        return (ArrayList<NodeRef>) notMigrate;
+    public List<NodeRef> getNotMigrate() {
+        return notMigrate;
     }
 
     @Override
