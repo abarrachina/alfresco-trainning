@@ -28,7 +28,7 @@ public class MigrateServiceSites implements MigrateService{
     //Static properties
     public static final String KEY_ERROR_SITES = "Sites";
 
-    private static Log logger = LogFactory.getLog(MigrateServiceSites.class);
+    private static final Log LOGGER = LogFactory.getLog(MigrateServiceSites.class);
 
     @Inject
     private AuthorityService authorityService;
@@ -50,12 +50,13 @@ public class MigrateServiceSites implements MigrateService{
     }
 
     private void migrateSites(final String olduser, final String newuser) {
-        String authority = "";
+    	String authority;
         final List<SiteInfo> sites = siteService.listSites(olduser);
-        final List<NodeRef> sitesNotMigrate =  new ArrayList<>();
-
+        
         for (final SiteInfo site: sites){
+        	authority = "";
             try{
+            	
                 final String role = siteService.getMembersRole(site.getShortName(), olduser);
                 authority = "GROUP_site_"+site.getShortName()+"_"+role;
                 if (!authorityService.getAuthoritiesForUser(newuser).contains(authority)){
@@ -63,8 +64,9 @@ public class MigrateServiceSites implements MigrateService{
                 }
             }
             catch(final UnknownAuthorityException ex){
-                sitesNotMigrate.add(site.getNodeRef());
-                logger.error("The authority "+ authority + " not exists " + ex.getMessage(),ex);
+            	
+                notMigrate.add(site.getNodeRef());
+                LOGGER.error("The authority "+ authority + " not exists " + ex.getMessage(),ex);
 
             }
         }

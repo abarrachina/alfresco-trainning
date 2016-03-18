@@ -25,7 +25,7 @@ public class MigrateServiceUserHome extends AbstractMigrateService {
     @Inject
     private NodeService nodeService;
 
-    private static Log logger = LogFactory.getLog(MigrateUserServiceImpl.class);
+    private static final Log LOGGER = LogFactory.getLog(MigrateUserServiceImpl.class);
 
     @Override
     public void migrate(final String olduser, final String newuser) {
@@ -49,12 +49,12 @@ public class MigrateServiceUserHome extends AbstractMigrateService {
                 catch (final NodeLockedException e)
                 {
                     this.addNodeNotMigrate(node);
-                    logger.error("The node " + node.toString() + " has locked", e);
+                    LOGGER.error("The node " + node.toString() + " has locked", e);
                 }
             }
             else{
                 this.addNodeNotMigrate(node);
-                logger.error("File or folder exists in the destination");
+                LOGGER.error("File or folder exists in the destination");
             }
         }
     }

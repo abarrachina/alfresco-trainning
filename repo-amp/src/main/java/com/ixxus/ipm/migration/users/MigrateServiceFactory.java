@@ -4,5 +4,5 @@ import org.springframework.context.ApplicationContextAware;
 
 public interface MigrateServiceFactory extends ApplicationContextAware {
 
-	public MigrateService getInstance(String beanName);
+    public MigrateService getInstance(String beanName);
 }

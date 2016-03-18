@@ -41,6 +41,16 @@
 	<bean id="my_extension_myDAO" class="com.ixxus.ipm.migration.users.dao.ActivitiProcessDAOImpl">
 		<property name="template" ref="my_extension_SqlSessionTemplate" />
 	</bean>
+	
+	<bean id="MigrateServiceWorkflow" class="com.ixxus.ipm.migration.users.MigrateServiceWorkflow" />
+	<bean id="MigrateServiceComments" class="com.ixxus.ipm.migration.users.MigrateServiceComments" />
+	<bean id="MigrateServiceContent" class="com.ixxus.ipm.migration.users.MigrateServiceContent" />
+	<bean id="MigrateServiceGroups" class="com.ixxus.ipm.migration.users.MigrateServiceGroups" />
+	<bean id="MigrateServicePreferences" class="com.ixxus.ipm.migration.users.MigrateServicePreferences" />
+	<bean id="MigrateServiceSites" class="com.ixxus.ipm.migration.users.MigrateServiceSites" />
+	<bean id="MigrateServiceUserHome" class="com.ixxus.ipm.migration.users.MigrateServiceUserHome" />
+	
+	
 
 
 </beans>

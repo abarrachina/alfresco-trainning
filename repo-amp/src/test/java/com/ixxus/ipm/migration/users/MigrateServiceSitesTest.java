@@ -1,5 +1,6 @@
 package com.ixxus.ipm.migration.users;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -86,9 +87,11 @@ public class MigrateServiceSitesTest {
 
     @Test
     public void unknownAuthorityExceptionTest(){
+    	int notMigrated = migrateServiceSites.getNotMigrate().size();
+
         doThrow(new UnknownAuthorityException("")).when(authorityService).addAuthority(getDummyAuthority(), newuser);
         migrateServiceSites.migrate(olduser, newuser);
-        verify(site,times(1)).getNodeRef();
+        assertTrue(migrateServiceSites.getNotMigrate().size() == notMigrated + 1);
     }
 
     /***

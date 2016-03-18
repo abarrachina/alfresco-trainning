@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 @Service
 public abstract class AbstractMigrateService implements MigrateService{
 
-    private static Log logger = LogFactory.getLog(AbstractMigrateService.class);
+    private static final Log LOGGER = LogFactory.getLog(AbstractMigrateService.class);
 
     @Inject
     private NodeService nodeService;
@@ -119,7 +119,7 @@ public abstract class AbstractMigrateService implements MigrateService{
         }
         catch(final InvalidNodeRefException ex){
             notMigrate.add(node);
-            logger.debug("The noderef "+ node.toString() + " can't migrate " + ex.getMessage(), ex);
+            LOGGER.debug("The noderef "+ node.toString() + " can't migrate " + ex.getMessage(), ex);
         }
         finally
         {

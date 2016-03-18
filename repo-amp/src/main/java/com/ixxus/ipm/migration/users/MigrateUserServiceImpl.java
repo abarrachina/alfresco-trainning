@@ -31,6 +31,8 @@ public class MigrateUserServiceImpl<T> implements MigrateUserService{
     public static final String KEY_ERROR_USERHOME = "UserHome";
     public static final String KEY_ERROR_PREFERENCES = "Preferences";
     public static final String KEY_ERROR_WORKFLOW = "Workflow";
+    
+    private MigrateService migrateService;
 
     private final Map<String, List<T>> notMigrated = new HashMap<>();
 
@@ -46,45 +48,53 @@ public class MigrateUserServiceImpl<T> implements MigrateUserService{
 
     @Override
     public void migrateSites(final String olduser, final String newuser, final Boolean toMigrate) {
+    	migrateService = factory.getInstance(getBeanName(MigrateActionExecuter.PARAM_SITES));
         migrate(olduser, newuser, toMigrate, KEY_ERROR_SITES);
 
     }
 
     @Override
     public void migrateGroups(final String olduser, final String newuser, final Boolean toMigrate) {
+    	migrateService = factory.getInstance(getBeanName(MigrateActionExecuter.PARAM_GROUPS));
         migrate(olduser, newuser, toMigrate, KEY_ERROR_GROUPS);
     }
 
     @Override
     public void migrateContent(final String olduser, final String newuser, final Boolean toMigrate) {
+    	migrateService = factory.getInstance(getBeanName(MigrateActionExecuter.PARAM_CONTENT));
         migrate(olduser, newuser, toMigrate, KEY_ERROR_CONTENT);
 
     }
 
     @Override
     public void migrateFolder(final String olduser, final String newuser, final Boolean toMigrate) {
+    	migrateService = factory.getInstance(getBeanName(MigrateActionExecuter.PARAM_CONTENT));
         migrate(olduser, newuser, toMigrate, KEY_ERROR_FOLDERS);
 
     }
 
     @Override
     public void migrateComments(final String olduser, final String newuser, final Boolean toMigrate) {
+    	migrateService = factory.getInstance(getBeanName(MigrateActionExecuter.PARAM_COMMENT));
         migrate(olduser, newuser, toMigrate, KEY_ERROR_COMMENTS);
     }
 
     @Override
     public void migrateUserHome(final String olduser, final String newuser, final Boolean toMigrate) {
-        migrate(olduser, newuser, toMigrate, KEY_ERROR_COMMENTS);
+    	migrateService = factory.getInstance(getBeanName(MigrateActionExecuter.PARAM_USERHOME));
+        migrate(olduser, newuser, toMigrate, KEY_ERROR_USERHOME);
     }
 
     @Override
     public void migratePreferences (final String olduser, final String newuser, final Boolean toMigrate){
+    	migrateService = factory.getInstance(getBeanName(MigrateActionExecuter.PARAM_FAVORITES));
         migrate(olduser, newuser, toMigrate, KEY_ERROR_PREFERENCES);
     }
 
     @Override
     public void migrateWorkflows(final String olduser, final String newuser, final Boolean toMigrate) {
 
+    	migrateService = factory.getInstance(getBeanName(MigrateActionExecuter.PARAM_WORKFLOWS));
         migrate(olduser, newuser, toMigrate, KEY_ERROR_WORKFLOW);
     }
 
@@ -93,7 +103,7 @@ public class MigrateUserServiceImpl<T> implements MigrateUserService{
         notMigrated.put(type, list);
     }
 
-    private String getBeanName(final String type){
+    private static String getBeanName(final String type){
 
         String result = "";
 
@@ -128,8 +138,7 @@ public class MigrateUserServiceImpl<T> implements MigrateUserService{
     }
 
     private void migrate(final String olduser,final String newuser, final Boolean toMigrate, final String type){
-        if (toMigrate){
-            final MigrateService migrateService = factory.getInstance(getBeanName(type));
+        if (toMigrate){            
             migrateService.migrate(olduser, newuser);
             addNoMigrated(migrateService.getNotMigrate(),type);
         }

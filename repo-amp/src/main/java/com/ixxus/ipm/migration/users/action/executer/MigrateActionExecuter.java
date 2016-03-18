@@ -1,6 +1,5 @@
 package com.ixxus.ipm.migration.users.action.executer;
 
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,14 +29,12 @@ import com.ixxus.ipm.migration.users.utils.MigrateActionUtils;
 
 /***
  *
- * @author nazareth.jimenez@ixxus.com
- * Action Migrate User
+ * @author nazareth.jimenez@ixxus.com Action Migrate User
  *
  */
 
-public class MigrateActionExecuter extends ActionExecuterAbstractBase
-{
-    private static Log logger = LogFactory.getLog(MigrateActionExecuter.class);
+public class MigrateActionExecuter extends ActionExecuterAbstractBase {
+    private static final Log LOGGER = LogFactory.getLog(MigrateActionExecuter.class);
     public static final String NAME_MIGRATE = "migrate-action";
     public static final String PARAM_NEW_USER = "newuser";
     public static final String PARAM_OLD_USER = "olduser";
@@ -60,138 +57,144 @@ public class MigrateActionExecuter extends ActionExecuterAbstractBase
     private SearchService searchService;
 
     public void setMigrateUserService(final MigrateUserService migrateUserServiceImpl) {
-        this.migrateUserServiceImpl = migrateUserServiceImpl;
+	this.migrateUserServiceImpl = migrateUserServiceImpl;
     }
 
     public void setServiceRegistry(final ServiceRegistry serviceRegistry) {
-        this.serviceRegistry = serviceRegistry;
+	this.serviceRegistry = serviceRegistry;
     }
 
     public void setSearchService(final SearchService searchService) {
-        this.searchService = searchService;
+	this.searchService = searchService;
     }
-
 
     @Override
     protected void addParameterDefinitions(final List<ParameterDefinition> paramList) {
-        paramList.add(new ParameterDefinitionImpl(PARAM_NEW_USER, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_NEW_USER)));
-        paramList.add(new ParameterDefinitionImpl(PARAM_OLD_USER, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_OLD_USER)));
-        paramList.add(new ParameterDefinitionImpl(PARAM_SITES, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_SITES)));
-        paramList.add(new ParameterDefinitionImpl(PARAM_GROUPS, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_GROUPS)));
-        paramList.add(new ParameterDefinitionImpl(PARAM_CONTENT, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_CONTENT)));
-        paramList.add(new ParameterDefinitionImpl(PARAM_COMMENT, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_COMMENT)));
-        paramList.add(new ParameterDefinitionImpl(PARAM_USERHOME, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_USERHOME)));
-        paramList.add(new ParameterDefinitionImpl(PARAM_FAVORITES, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_FAVORITES)));
-        paramList.add(new ParameterDefinitionImpl(PARAM_WORKFLOWS, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_WORKFLOWS)));
+	paramList.add(new ParameterDefinitionImpl(PARAM_NEW_USER, DataTypeDefinition.TEXT, false,
+		getParamDisplayLabel(PARAM_NEW_USER)));
+	paramList.add(new ParameterDefinitionImpl(PARAM_OLD_USER, DataTypeDefinition.TEXT, false,
+		getParamDisplayLabel(PARAM_OLD_USER)));
+	paramList.add(new ParameterDefinitionImpl(PARAM_SITES, DataTypeDefinition.TEXT, false,
+		getParamDisplayLabel(PARAM_SITES)));
+	paramList.add(new ParameterDefinitionImpl(PARAM_GROUPS, DataTypeDefinition.TEXT, false,
+		getParamDisplayLabel(PARAM_GROUPS)));
+	paramList.add(new ParameterDefinitionImpl(PARAM_CONTENT, DataTypeDefinition.TEXT, false,
+		getParamDisplayLabel(PARAM_CONTENT)));
+	paramList.add(new ParameterDefinitionImpl(PARAM_COMMENT, DataTypeDefinition.TEXT, false,
+		getParamDisplayLabel(PARAM_COMMENT)));
+	paramList.add(new ParameterDefinitionImpl(PARAM_USERHOME, DataTypeDefinition.TEXT, false,
+		getParamDisplayLabel(PARAM_USERHOME)));
+	paramList.add(new ParameterDefinitionImpl(PARAM_FAVORITES, DataTypeDefinition.TEXT, false,
+		getParamDisplayLabel(PARAM_FAVORITES)));
+	paramList.add(new ParameterDefinitionImpl(PARAM_WORKFLOWS, DataTypeDefinition.TEXT, false,
+		getParamDisplayLabel(PARAM_WORKFLOWS)));
 
     }
 
     @Override
     protected void executeImpl(final Action action, final NodeRef actionedUponNodeRef) {
-        final Serializable paramNewUser = action.getParameterValue(PARAM_NEW_USER);
-        final Serializable paramOldUser = action.getParameterValue(PARAM_OLD_USER);
-        final Serializable paramSites = action.getParameterValue(PARAM_SITES);
-        final Serializable paramGroups = action.getParameterValue(PARAM_GROUPS);
-        final Serializable paramContent = action.getParameterValue(PARAM_CONTENT);
-        final Serializable paramComment = action.getParameterValue(PARAM_COMMENT);
-        final Serializable paramUserHome = action.getParameterValue(PARAM_USERHOME);
-        final Serializable paramFavorites = action.getParameterValue(PARAM_FAVORITES);
-        final Serializable paramWorkflows = action.getParameterValue(PARAM_WORKFLOWS);
+	final Serializable paramNewUser = action.getParameterValue(PARAM_NEW_USER);
+	final Serializable paramOldUser = action.getParameterValue(PARAM_OLD_USER);
+	final Serializable paramSites = action.getParameterValue(PARAM_SITES);
+	final Serializable paramGroups = action.getParameterValue(PARAM_GROUPS);
+	final Serializable paramContent = action.getParameterValue(PARAM_CONTENT);
+	final Serializable paramComment = action.getParameterValue(PARAM_COMMENT);
+	final Serializable paramUserHome = action.getParameterValue(PARAM_USERHOME);
+	final Serializable paramFavorites = action.getParameterValue(PARAM_FAVORITES);
+	final Serializable paramWorkflows = action.getParameterValue(PARAM_WORKFLOWS);
 
-        final String newuser = paramNewUser.toString();
-        final String olduser = paramOldUser.toString();
-        final Boolean sites = Boolean.valueOf(paramSites.toString());
-        final Boolean groups = Boolean.valueOf(paramGroups.toString());
-        final Boolean content = Boolean.valueOf(paramContent.toString());
-        final Boolean comments = Boolean.valueOf(paramComment.toString());
-        final Boolean userhome = Boolean.valueOf(paramUserHome.toString());
-        final Boolean favorites = Boolean.valueOf(paramFavorites.toString());
-        final Boolean workflows = Boolean.valueOf(paramWorkflows.toString());
+	final String newuser = paramNewUser.toString();
+	final String olduser = paramOldUser.toString();
+	final Boolean sites = Boolean.valueOf(paramSites.toString());
+	final Boolean groups = Boolean.valueOf(paramGroups.toString());
+	final Boolean content = Boolean.valueOf(paramContent.toString());
+	final Boolean comments = Boolean.valueOf(paramComment.toString());
+	final Boolean userhome = Boolean.valueOf(paramUserHome.toString());
+	final Boolean favorites = Boolean.valueOf(paramFavorites.toString());
+	final Boolean workflows = Boolean.valueOf(paramWorkflows.toString());
 
-        migrateUserServiceImpl.migrateWorkflows(olduser, newuser, workflows);
-        migrateUserServiceImpl.migrateSites(olduser, newuser, sites);
-        migrateUserServiceImpl.migrateGroups(olduser, newuser, groups);
-        migrateUserServiceImpl.migrateContent(olduser, newuser, content);
-        migrateUserServiceImpl.migrateFolder(olduser, newuser, content);
-        migrateUserServiceImpl.migrateComments(olduser, newuser, comments);
-        migrateUserServiceImpl.migrateUserHome(olduser, newuser, userhome);
-        migrateUserServiceImpl.migratePreferences(olduser, newuser, favorites);
+	migrateUserServiceImpl.migrateWorkflows(olduser, newuser, workflows);
+	migrateUserServiceImpl.migrateSites(olduser, newuser, sites);
+	migrateUserServiceImpl.migrateGroups(olduser, newuser, groups);
+	migrateUserServiceImpl.migrateContent(olduser, newuser, content);
+	migrateUserServiceImpl.migrateFolder(olduser, newuser, content);
+	migrateUserServiceImpl.migrateComments(olduser, newuser, comments);
+	migrateUserServiceImpl.migrateUserHome(olduser, newuser, userhome);
+	migrateUserServiceImpl.migratePreferences(olduser, newuser, favorites);
 
-        sendEmail();
+	sendEmail();
     }
 
     /***
      * Send the email with the content that the process can't migrate
      */
-    private void sendEmail(){
-        final ActionService actionService = serviceRegistry.getActionService();
-        final Action mailAction = actionService.createAction(MailActionExecuter.NAME);
-        mailAction.setParameterValue(MailActionExecuter.PARAM_SUBJECT, "Migration Information");
+    private void sendEmail() {
+	final ActionService actionService = serviceRegistry.getActionService();
+	final Action mailAction = actionService.createAction(MailActionExecuter.NAME);
+	mailAction.setParameterValue(MailActionExecuter.PARAM_SUBJECT, "Migration Information");
 
-        final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
-        ResultSet rs;
-        NodeRef template;
+	final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
+	ResultSet rs;
+	NodeRef template;
 
-        rs = searchService.query(storeRef, SearchService.LANGUAGE_LUCENE, pathTemplate);
+	rs = searchService.query(storeRef, SearchService.LANGUAGE_LUCENE, pathTemplate);
 
-        if ((rs != null) && (rs.length()>0)) {
-            template = rs.getNodeRef(0);
+	if ((rs != null) && (rs.length() > 0)) {
+	    template = rs.getNodeRef(0);
 
-            mailAction.setParameterValue(MailActionExecuter.PARAM_TEMPLATE, template);
-            mailAction.setParameterValue(MailActionExecuter.PARAM_TO, email);
+	    mailAction.setParameterValue(MailActionExecuter.PARAM_TEMPLATE, template);
+	    mailAction.setParameterValue(MailActionExecuter.PARAM_TO, email);
 
-            final Map<String, Serializable> templateArgs = prepareTemplate();
+	    final Map<String, Serializable> templateArgs = prepareTemplate();
 
-            mailAction.setParameterValue(MailActionExecuter.PARAM_TEMPLATE_MODEL,(Serializable)templateArgs);
-            actionService.executeAction(mailAction, null);
-        }
-        else{
-            logger.debug("The email template doesn't exist");
-        }
+	    mailAction.setParameterValue(MailActionExecuter.PARAM_TEMPLATE_MODEL, (Serializable) templateArgs);
+	    actionService.executeAction(mailAction, null);
+	} else {
+	    LOGGER.debug("The email template doesn't exist");
+	}
     }
 
     /***
      *
      * @return email template
      */
-    private Map<String, Serializable> prepareTemplate(){
+    private Map<String, Serializable> prepareTemplate() {
 
-        final Map<String, Serializable> templateArgs = new HashMap<>();
-        final Map<String, ArrayList<T>> notMigrate = migrateUserServiceImpl.getNotMigrate();
-        final ArrayList<T> sitesNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_SITES);
-        final ArrayList<T> groupsNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_GROUPS);
-        final ArrayList<T> contentNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_CONTENT);
-        final ArrayList<T> foldersNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_FOLDERS);
-        final ArrayList<T> commentsNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_COMMENTS);
-        final ArrayList<T> userHomeNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_USERHOME);
-        final ArrayList<T> workflowsNoMigrated = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_WORKFLOW);
+	final Map<String, Serializable> templateArgs = new HashMap<>();
+	final Map<String, ArrayList<T>> notMigrate = migrateUserServiceImpl.getNotMigrate();
+	final ArrayList<T> sitesNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_SITES);
+	final ArrayList<T> groupsNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_GROUPS);
+	final ArrayList<T> contentNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_CONTENT);
+	final ArrayList<T> foldersNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_FOLDERS);
+	final ArrayList<T> commentsNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_COMMENTS);
+	final ArrayList<T> userHomeNotMigrate = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_USERHOME);
+	final ArrayList<T> workflowsNoMigrated = notMigrate.get(MigrateUserServiceImpl.KEY_ERROR_WORKFLOW);
 
-
-        if (!MigrateActionUtils.isNullOrEmpty(sitesNotMigrate)){
-            templateArgs.put("sitesNotMigrate", sitesNotMigrate);
-        }
-        if (!MigrateActionUtils.isNullOrEmpty(groupsNotMigrate)){
-            templateArgs.put("groupsNotMigrate", groupsNotMigrate);
-        }
-        if (!MigrateActionUtils.isNullOrEmpty(contentNotMigrate)){
-            templateArgs.put("contentNotMigrate", contentNotMigrate);
-        }
-        if  (!MigrateActionUtils.isNullOrEmpty(foldersNotMigrate)){
-            templateArgs.put("foldersNotMigrate", foldersNotMigrate);
-        }
-        if  (!MigrateActionUtils.isNullOrEmpty(commentsNotMigrate)){
-            templateArgs.put("commentsNotMigrate", commentsNotMigrate);
-        }
-        if  (!MigrateActionUtils.isNullOrEmpty(userHomeNotMigrate)){
-            templateArgs.put("userHomeNotMigrate", userHomeNotMigrate);
-        }
-        if  (!MigrateActionUtils.isNullOrEmpty(workflowsNoMigrated)){
-            templateArgs.put("workflowsNoMigrated", workflowsNoMigrated);
-        }
-        return templateArgs;
+	if (!MigrateActionUtils.isNullOrEmpty(sitesNotMigrate)) {
+	    templateArgs.put("sitesNotMigrate", sitesNotMigrate);
+	}
+	if (!MigrateActionUtils.isNullOrEmpty(groupsNotMigrate)) {
+	    templateArgs.put("groupsNotMigrate", groupsNotMigrate);
+	}
+	if (!MigrateActionUtils.isNullOrEmpty(contentNotMigrate)) {
+	    templateArgs.put("contentNotMigrate", contentNotMigrate);
+	}
+	if (!MigrateActionUtils.isNullOrEmpty(foldersNotMigrate)) {
+	    templateArgs.put("foldersNotMigrate", foldersNotMigrate);
+	}
+	if (!MigrateActionUtils.isNullOrEmpty(commentsNotMigrate)) {
+	    templateArgs.put("commentsNotMigrate", commentsNotMigrate);
+	}
+	if (!MigrateActionUtils.isNullOrEmpty(userHomeNotMigrate)) {
+	    templateArgs.put("userHomeNotMigrate", userHomeNotMigrate);
+	}
+	if (!MigrateActionUtils.isNullOrEmpty(workflowsNoMigrated)) {
+	    templateArgs.put("workflowsNoMigrated", workflowsNoMigrated);
+	}
+	return templateArgs;
     }
 
     public String getPathTemplate() {
-        return pathTemplate;
+	return pathTemplate;
     }
 }

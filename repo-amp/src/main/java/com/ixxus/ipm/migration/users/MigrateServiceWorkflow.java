@@ -50,7 +50,7 @@ public class MigrateServiceWorkflow implements MigrateService {
 
     private final List<String> notMigrated = new ArrayList<>();
 
-    private static Log logger = LogFactory.getLog(MigrateUserServiceImpl.class);
+    private static final Log LOGGER = LogFactory.getLog(MigrateUserServiceImpl.class);
 
 
     @FunctionalInterface
@@ -154,7 +154,7 @@ public class MigrateServiceWorkflow implements MigrateService {
                     this.migrateUsersForWorkflow(task, olduser, newuser);
                 }catch (final Exception e) {
                     this.notMigrated.add(task.getId()+ " " +task.getName());
-                    logger.error("Failing setting initiator", e);
+                    LOGGER.error("Failing setting initiator", e);
                 }
             }
         }
@@ -198,7 +198,7 @@ public class MigrateServiceWorkflow implements MigrateService {
                 }
             }catch(final Exception e){
                 this.notMigrated.add(task.getId()+ " " +task.getName());
-                logger.error("Failing setting asignee", e);
+                LOGGER.error("Failing setting asignee", e);
             }
         }
 

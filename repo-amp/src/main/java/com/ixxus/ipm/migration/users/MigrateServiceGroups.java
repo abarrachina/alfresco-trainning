@@ -27,7 +27,7 @@ public class MigrateServiceGroups implements MigrateService{
     //Static properties
     public static final String KEY_ERROR_GROUPS = "Groups";
 
-    private static Log logger = LogFactory.getLog(MigrateServiceGroups.class);
+    private static final Log LOGGER = LogFactory.getLog(MigrateServiceGroups.class);
 
     @Inject
     private AuthorityService authorityService;
@@ -47,8 +47,7 @@ public class MigrateServiceGroups implements MigrateService{
 
     private void migrateGroups(final String olduser, final String newuser) {
         final Set<String> groups = authorityService.getAuthoritiesForUser(olduser);
-        final List<NodeRef> groupsNotMigrate  = new ArrayList<>();
-
+        
         for (final String group:groups){
             try{
                 if (!authorityService.getAuthoritiesForUser(newuser).contains(group)){
@@ -56,8 +55,8 @@ public class MigrateServiceGroups implements MigrateService{
                 }
             }
             catch(final UnknownAuthorityException ex){
-                groupsNotMigrate.add(authorityService.getAuthorityNodeRef(group));
-                logger.error("The authority "+ group + " not exists " + ex.getMessage(), ex);
+                notMigrate.add(authorityService.getAuthorityNodeRef(group));
+                LOGGER.error("The authority "+ group + " not exists " + ex.getMessage(), ex);
             }
         }
     }
