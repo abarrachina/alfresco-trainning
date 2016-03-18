@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 
@@ -19,16 +21,19 @@ public class MigrateUserServiceImpl<T> implements MigrateUserService{
 
 
     //Static properties
-    public static final String KEY_ERROR_SITES = MigrateServiceFactory.SITES;
-    public static final String KEY_ERROR_GROUPS = MigrateServiceFactory.GROUPS;
-    public static final String KEY_ERROR_CONTENT = MigrateServiceFactory.CONTENT;
-    public static final String KEY_ERROR_FOLDERS = MigrateServiceFactory.CONTENT;
-    public static final String KEY_ERROR_COMMENTS = MigrateServiceFactory.COMMENTS;
-    public static final String KEY_ERROR_USERHOME = MigrateServiceFactory.USERHOME;
-    public static final String KEY_ERROR_WORKFLOW = MigrateServiceFactory.WORKFLOWS;
+    public static final String KEY_ERROR_SITES = "Sites";
+    public static final String KEY_ERROR_GROUPS = "Groups";
+    public static final String KEY_ERROR_CONTENT = "Content";
+    public static final String KEY_ERROR_FOLDERS = "Folders";
+    public static final String KEY_ERROR_COMMENTS = "Comments";
+    public static final String KEY_ERROR_USERHOME = "UserHome";
+    public static final String KEY_ERROR_PREFERENCES = "Preferences";
+    public static final String KEY_ERROR_WORKFLOW = "Workflow";
 
     private final Map<String, List<T>> notMigrated = new HashMap<>();
 
+    @Inject
+    private MigrateServiceFactory factory;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -39,46 +44,46 @@ public class MigrateUserServiceImpl<T> implements MigrateUserService{
 
     @Override
     public void migrateSites(final String olduser, final String newuser, final Boolean toMigrate) {
-        migrate(olduser, newuser, toMigrate, MigrateServiceFactory.SITES);
+        migrate(olduser, newuser, toMigrate, KEY_ERROR_SITES);
 
     }
 
     @Override
     public void migrateGroups(final String olduser, final String newuser, final Boolean toMigrate) {
-        migrate(olduser, newuser, toMigrate, MigrateServiceFactory.GROUPS);
+        migrate(olduser, newuser, toMigrate, KEY_ERROR_GROUPS);
     }
 
     @Override
     public void migrateContent(final String olduser, final String newuser, final Boolean toMigrate) {
-        migrate(olduser, newuser, toMigrate, MigrateServiceFactory.CONTENT);
+        migrate(olduser, newuser, toMigrate, KEY_ERROR_CONTENT);
 
     }
 
     @Override
     public void migrateFolder(final String olduser, final String newuser, final Boolean toMigrate) {
-        migrate(olduser, newuser, toMigrate, MigrateServiceFactory.CONTENT);
+        migrate(olduser, newuser, toMigrate, KEY_ERROR_FOLDERS);
 
     }
 
     @Override
     public void migrateComments(final String olduser, final String newuser, final Boolean toMigrate) {
-        migrate(olduser, newuser, toMigrate, MigrateServiceFactory.COMMENTS);
+        migrate(olduser, newuser, toMigrate, KEY_ERROR_COMMENTS);
     }
 
     @Override
     public void migrateUserHome(final String olduser, final String newuser, final Boolean toMigrate) {
-        migrate(olduser, newuser, toMigrate, MigrateServiceFactory.USERHOME);
+        migrate(olduser, newuser, toMigrate, KEY_ERROR_COMMENTS);
     }
 
     @Override
     public void migratePreferences (final String olduser, final String newuser, final Boolean toMigrate){
-        migrate(olduser, newuser, toMigrate, MigrateServiceFactory.PREFERENCES);
+        migrate(olduser, newuser, toMigrate, KEY_ERROR_PREFERENCES);
     }
 
     @Override
     public void migrateWorkflows(final String olduser, final String newuser, final Boolean toMigrate) {
 
-        migrate(olduser, newuser, toMigrate, MigrateServiceFactory.WORKFLOWS);
+        migrate(olduser, newuser, toMigrate, KEY_ERROR_WORKFLOW);
     }
 
     private void addNoMigrated(final List<T> list, final String type){
@@ -88,7 +93,7 @@ public class MigrateUserServiceImpl<T> implements MigrateUserService{
 
     private void migrate(final String olduser,final String newuser, final Boolean toMigrate, final String type){
         if (toMigrate){
-            final MigrateService migrateService = MigrateServiceFactory.createMigrateService(type);
+            final MigrateService migrateService = factory.getInstance(type);
             migrateService.migrate(olduser, newuser);
             addNoMigrated(migrateService.getNotMigrate(),type);
         }
