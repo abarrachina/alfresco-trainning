@@ -55,8 +55,8 @@ public abstract class AbstractMigrateService implements MigrateService{
 
     @SuppressWarnings("unchecked")
     @Override
-    public ArrayList<NodeRef> getNotMigrate() {
-        return (ArrayList<NodeRef>) notMigrate;
+    public List<NodeRef> getNotMigrate() {
+        return notMigrate;
     }
 
     @Override
@@ -76,9 +76,11 @@ public abstract class AbstractMigrateService implements MigrateService{
         ResultSet results = null;
         try{
             results = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, strQuery);
-            nodeRefs = results.getNodeRefs();
-            for (final NodeRef nodeRef:nodeRefs){
-                changeCreatorModifier(nodeRef, newuser, typeContent);
+            if(results != null){
+                nodeRefs = results.getNodeRefs();
+                for (final NodeRef nodeRef:nodeRefs){
+                    changeCreatorModifier(nodeRef, newuser, typeContent);
+                }
             }
         }
         finally{
