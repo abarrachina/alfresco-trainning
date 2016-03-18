@@ -75,6 +75,14 @@
     </dependencies>
       <build>
     	<plugins>
+    	 <plugin>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.3</version>
+            <configuration>
+                <executable><!--path-to-your-java8-home-directoru--></executable>
+                <compilerVersion>1.8</compilerVersion>
+            </configuration>
+        </plugin>
 		<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
